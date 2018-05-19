@@ -7,7 +7,7 @@ Module Name:
 Abstract:
 
    This file contains the device entry points and callbacks.
-    
+
 Environment:
 
     Kernel-mode Driver Framework
@@ -26,7 +26,7 @@ Environment:
 NTSTATUS
 WireShockCreateDevice(
     _Inout_ PWDFDEVICE_INIT DeviceInit
-    )
+)
 /*++
 
 Routine Description:
@@ -52,6 +52,9 @@ Return Value:
     NTSTATUS status;
 
     PAGED_CODE();
+
+    WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_BUS_EXTENDER);
+    WdfDeviceInitSetExclusive(DeviceInit, TRUE);
 
     WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&pnpPowerCallbacks);
     pnpPowerCallbacks.EvtDevicePrepareHardware = WireShockEvtDevicePrepareHardware;
@@ -86,7 +89,7 @@ Return Value:
             device,
             &GUID_DEVINTERFACE_WireShock,
             NULL // ReferenceString
-            );
+        );
 
         if (NT_SUCCESS(status)) {
             //
@@ -104,7 +107,7 @@ WireShockEvtDevicePrepareHardware(
     _In_ WDFDEVICE Device,
     _In_ WDFCMRESLIST ResourceList,
     _In_ WDFCMRESLIST ResourceListTranslated
-    )
+)
 /*++
 
 Routine Description:
@@ -158,18 +161,18 @@ Return Value:
         // documentation for WdfUsbTargetDeviceCreateWithParameters.
         //
         WDF_USB_DEVICE_CREATE_CONFIG_INIT(&createParams,
-                                         USBD_CLIENT_CONTRACT_VERSION_602
-                                         );
+            USBD_CLIENT_CONTRACT_VERSION_602
+        );
 
         status = WdfUsbTargetDeviceCreateWithParameters(Device,
-                                                    &createParams,
-                                                    WDF_NO_OBJECT_ATTRIBUTES,
-                                                    &pDeviceContext->UsbDevice
-                                                    );
+            &createParams,
+            WDF_NO_OBJECT_ATTRIBUTES,
+            &pDeviceContext->UsbDevice
+        );
 
         if (!NT_SUCCESS(status)) {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
-                        "WdfUsbTargetDeviceCreateWithParameters failed 0x%x", status);
+                "WdfUsbTargetDeviceCreateWithParameters failed 0x%x", status);
             return status;
         }
     }
@@ -179,17 +182,17 @@ Return Value:
     // setting of each interface
     //
     WDF_USB_DEVICE_SELECT_CONFIG_PARAMS_INIT_MULTIPLE_INTERFACES(&configParams,
-                                                                 0,
-                                                                 NULL
-                                                                 );
+        0,
+        NULL
+    );
     status = WdfUsbTargetDeviceSelectConfig(pDeviceContext->UsbDevice,
-                                            WDF_NO_OBJECT_ATTRIBUTES,
-                                            &configParams
-                                            );
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &configParams
+    );
 
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
-                    "WdfUsbTargetDeviceSelectConfig failed 0x%x", status);
+            "WdfUsbTargetDeviceSelectConfig failed 0x%x", status);
         return status;
     }
 
