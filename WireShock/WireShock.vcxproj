@@ -43,6 +43,7 @@
     <ClCompile Include="Driver.c" />
     <ClCompile Include="HCI.c" />
     <ClCompile Include="Interrupt.c" />
+    <ClCompile Include="L2CAP.c" />
     <ClCompile Include="Queue.c" />
     <ClCompile Include="WireBus.c" />
   </ItemGroup>
@@ -53,6 +54,7 @@
     <ClInclude Include="Driver.h" />
     <ClInclude Include="HCI.h" />
     <ClInclude Include="Interrupt.h" />
+    <ClInclude Include="L2CAP.h" />
     <ClInclude Include="WireBus.h" />
     <ClInclude Include="WireShock.h" />
     <ClInclude Include="Public.h" />

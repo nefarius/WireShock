@@ -31,6 +31,7 @@ Environment:
 #include "HCI.h"
 #include "Interrupt.h"
 #include "Bulkrwr.h"
+#include "L2CAP.h"
 
 
 EXTERN_C_START
