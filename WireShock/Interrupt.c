@@ -28,6 +28,49 @@ SOFTWARE.
 #include "interrupt.tmh"
 
 
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS 
+WireShockConfigContReaderForInterruptEndPoint(
+    WDFDEVICE Device
+)
+{
+    WDF_USB_CONTINUOUS_READER_CONFIG contReaderConfig;
+    NTSTATUS status;
+    PDEVICE_CONTEXT pDeviceContext;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "%!FUNC! Entry");
+
+    pDeviceContext = DeviceGetContext(Device);
+
+    WDF_USB_CONTINUOUS_READER_CONFIG_INIT(&contReaderConfig,
+        WireShockEvtUsbInterruptPipeReadComplete,
+        Device,    // Context
+        INTERRUPT_IN_BUFFER_LENGTH);   // TransferLength
+
+    contReaderConfig.EvtUsbTargetPipeReadersFailed = WireShockEvtUsbInterruptReadersFailed;
+
+    //
+    // Reader requests are not posted to the target automatically.
+    // Driver must explictly call WdfIoTargetStart to kick start the
+    // reader.  In this sample, it's done in D0Entry.
+    // By defaut, framework queues two requests to the target
+    // endpoint. Driver can configure up to 10 requests with CONFIG macro.
+    //
+    status = WdfUsbTargetPipeConfigContinuousReader(pDeviceContext->InterruptPipe,
+        &contReaderConfig);
+
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
+            "WdfUsbTargetPipeConfigContinuousReader failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "%!FUNC! Exit");
+
+    return status;
+}
+
 NTSTATUS
 SendControlRequest(
     _In_ PDEVICE_CONTEXT Context,
@@ -104,4 +147,18 @@ WireShockEvtUsbInterruptPipeReadComplete(
     UNREFERENCED_PARAMETER(Buffer);
     UNREFERENCED_PARAMETER(NumBytesTransferred);
     UNREFERENCED_PARAMETER(Context);
+}
+
+BOOLEAN
+WireShockEvtUsbInterruptReadersFailed(
+    _In_ WDFUSBPIPE Pipe,
+    _In_ NTSTATUS Status,
+    _In_ USBD_STATUS UsbdStatus
+)
+{
+    UNREFERENCED_PARAMETER(Pipe);
+    UNREFERENCED_PARAMETER(Status);
+    UNREFERENCED_PARAMETER(UsbdStatus);
+
+    return TRUE;
 }
