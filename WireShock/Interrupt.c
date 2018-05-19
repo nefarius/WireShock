@@ -183,6 +183,7 @@ WireShockEvtUsbInterruptPipeReadComplete(
     //PAIRBENDER_GET_CLIENT_REMOVAL   pRemoval;
     size_t                          buflen;
     PBTH_DEVICE                     pClientDevice;
+    PDO_IDENTIFICATION_DESCRIPTION  pChildDesc;
 
     UNREFERENCED_PARAMETER(Pipe);
 
@@ -554,12 +555,24 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
         BD_ADDR_FROM_BUFFER(clientAddr, &buffer[2]);
 
-        // TODO: implement child arrival event
-        //status = BTH_DEVICE_LIST_ADD(&pDeviceContext->ClientDeviceList, &clientAddr, Device);
+        WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER_INIT(
+            &pChildDesc.Header,
+            sizeof(PDO_IDENTIFICATION_DESCRIPTION)
+        );
+
+        pChildDesc.ClientAddress = clientAddr;
+
+        status = WdfChildListAddOrUpdateChildDescriptionAsPresent(
+            WdfFdoGetDefaultChildList(Device),
+            &pChildDesc.Header,
+            NULL
+        );
+        
         if (!NT_SUCCESS(status))
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
-                "BTH_DEVICE_LIST_ADD failed with status 0x%X", status);
+                "WdfChildListAddOrUpdateChildDescriptionAsPresent failed with status %!STATUS!",
+                status);
             break;
         }
 
