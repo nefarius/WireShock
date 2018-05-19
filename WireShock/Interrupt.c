@@ -29,7 +29,7 @@ SOFTWARE.
 
 
 _IRQL_requires_(PASSIVE_LEVEL)
-NTSTATUS 
+NTSTATUS
 WireShockConfigContReaderForInterruptEndPoint(
     WDFDEVICE Device
 )
@@ -83,19 +83,40 @@ SendControlRequest(
 {
     NTSTATUS                        status;
     WDF_USB_CONTROL_SETUP_PACKET    controlSetupPacket;
-    WDF_REQUEST_SEND_OPTIONS        sendOptions;
-    WDF_MEMORY_DESCRIPTOR           memDesc;
-    ULONG                           bytesTransferred;
+    WDFREQUEST                      request;
+    WDF_OBJECT_ATTRIBUTES           attribs;
+    WDFMEMORY                       memory;
+    PVOID                           writeBufferPointer;
 
-    WDF_REQUEST_SEND_OPTIONS_INIT(
-        &sendOptions,
-        WDF_REQUEST_SEND_OPTION_TIMEOUT
-    );
+    WDF_OBJECT_ATTRIBUTES_INIT(&attribs);
 
-    WDF_REQUEST_SEND_OPTIONS_SET_TIMEOUT(
-        &sendOptions,
-        DEFAULT_CONTROL_TRANSFER_TIMEOUT
-    );
+    status = WdfRequestCreate(&attribs,
+        WdfUsbTargetDeviceGetIoTarget(Context->UsbDevice),
+        &request);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
+            "WdfRequestCreate failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    WDF_OBJECT_ATTRIBUTES_INIT(&attribs);
+    attribs.ParentObject = request;
+
+    status = WdfMemoryCreate(&attribs,
+        NonPagedPool,
+        WIRESHOCK_POOL_TAG,
+        BufferLength,
+        &memory,
+        &writeBufferPointer);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
+            "WdfMemoryCreate failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    RtlCopyMemory(writeBufferPointer, Buffer, BufferLength);
 
     switch (Type)
     {
@@ -112,24 +133,31 @@ SendControlRequest(
         return STATUS_INVALID_PARAMETER;
     }
 
-    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&memDesc,
-        Buffer,
-        BufferLength);
-
-    status = WdfUsbTargetDeviceSendControlTransferSynchronously(
+    status = WdfUsbTargetDeviceFormatRequestForControlTransfer(
         Context->UsbDevice,
-        WDF_NO_HANDLE,
-        &sendOptions,
+        request,
         &controlSetupPacket,
-        &memDesc,
-        &bytesTransferred);
+        memory,
+        NULL
+    );
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
+            "WdfUsbTargetDeviceFormatRequestForControlTransfer failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    if (WdfRequestSend(request,
+        WdfUsbTargetDeviceGetIoTarget(Context->UsbDevice),
+        NULL) == FALSE)
+    {
+        status = WdfRequestGetStatus(request);
+    }
 
     if (!NT_SUCCESS(status)) {
-
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
-            "WdfUsbTargetDeviceSendControlTransferSynchronously: Failed - 0x%x (%d)",
-            status, 
-            bytesTransferred);
+            "WdfRequestSend failed with status %!STATUS!",
+            status);
     }
 
     return status;
@@ -229,7 +257,7 @@ WireShockEvtUsbInterruptPipeReadComplete(
             // By this time the host controller should've dropped all
             // connections so we are safe to remove all allocated resources.
             // 
-            
+
             // TODO: implement child list clean-up
             //BTH_DEVICE_LIST_FREE(&pDeviceContext->ClientDeviceList);
 
@@ -648,7 +676,7 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
             //
             // Scan through rest of buffer until null-terminator is found
-            // 
+            //
             for (length = 1;
                 buffer[length + 8] != 0x00
                 && (length + 8) < NumBytesTransferred;
@@ -656,17 +684,17 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
             //
             // Allocate memory for name (including null-terminator)
-            // 
+            //
             device->RemoteName = malloc(length);
 
             //
             // Store remote name in device context
-            // 
+            //
             RtlCopyMemory(device->RemoteName, &buffer[9], length);
 
             //
             // Remote name is used to distinguish device type
-            // 
+            //
             device->DeviceType =
                 (strcmp("Wireless Controller", device->RemoteName) == 0) ? DualShock4 : DualShock3;
 
