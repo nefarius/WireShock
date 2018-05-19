@@ -69,6 +69,7 @@ Return Value:
 
     WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&pnpPowerCallbacks);
     pnpPowerCallbacks.EvtDevicePrepareHardware = WireShockEvtDevicePrepareHardware;
+    pnpPowerCallbacks.EvtDeviceD0Entry = WireShockEvtDeviceD0Entry;
     WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
 
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&deviceAttributes, DEVICE_CONTEXT);
@@ -86,11 +87,7 @@ Return Value:
         // run under framework verifier mode.
         //
         deviceContext = DeviceGetContext(device);
-
-        //
-        // Initialize the context.
-        //
-        deviceContext->PrivateDeviceData = 0;
+                
 
         //
         // Create a device interface so that applications can find and talk
@@ -141,6 +138,10 @@ Return Value:
     PDEVICE_CONTEXT pDeviceContext;
     WDF_USB_DEVICE_CREATE_CONFIG createParams;
     WDF_USB_DEVICE_SELECT_CONFIG_PARAMS configParams;
+    WDFUSBPIPE                          pipe;
+    WDF_USB_PIPE_INFORMATION            pipeInfo;
+    UCHAR                               index;
+    UCHAR                               numberConfiguredPipes;
 
     UNREFERENCED_PARAMETER(ResourceList);
     UNREFERENCED_PARAMETER(ResourceListTranslated);
@@ -206,6 +207,137 @@ Return Value:
             "WdfUsbTargetDeviceSelectConfig failed 0x%x", status);
         return status;
     }
+
+    pDeviceContext->UsbInterface =
+        WdfUsbTargetDeviceGetInterface(pDeviceContext->UsbDevice, 0);
+
+    if (NULL == pDeviceContext->UsbInterface) {
+        status = STATUS_UNSUCCESSFUL;
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
+            "WdfUsbTargetDeviceGetInterface 0 failed %!STATUS!",
+            status);
+        return status;
+    }
+
+    numberConfiguredPipes = WdfUsbInterfaceGetNumConfiguredPipes(pDeviceContext->UsbInterface);
+
+    //
+    // Get pipe handles
+    //
+    for (index = 0; index < numberConfiguredPipes; index++) {
+
+        WDF_USB_PIPE_INFORMATION_INIT(&pipeInfo);
+
+        pipe = WdfUsbInterfaceGetConfiguredPipe(
+            pDeviceContext->UsbInterface,
+            index, //PipeIndex,
+            &pipeInfo
+        );
+        //
+        // Tell the framework that it's okay to read less than
+        // MaximumPacketSize
+        //
+        WdfUsbTargetPipeSetNoMaximumPacketSizeCheck(pipe);
+
+        if (WdfUsbPipeTypeInterrupt == pipeInfo.PipeType) {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE,
+                "Interrupt Pipe is 0x%p", pipe);
+            pDeviceContext->InterruptPipe = pipe;
+        }
+
+        if (WdfUsbPipeTypeBulk == pipeInfo.PipeType &&
+            WdfUsbTargetPipeIsInEndpoint(pipe)) {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE,
+                "BulkInput Pipe is 0x%p", pipe);
+            pDeviceContext->BulkReadPipe = pipe;
+        }
+
+        if (WdfUsbPipeTypeBulk == pipeInfo.PipeType &&
+            WdfUsbTargetPipeIsOutEndpoint(pipe)) {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE,
+                "BulkOutput Pipe is 0x%p", pipe);
+            pDeviceContext->BulkWritePipe = pipe;
+        }
+    }
+
+    //
+    // If we didn't find all the 3 pipes, fail the start.
+    //
+    if (!(pDeviceContext->BulkWritePipe
+        && pDeviceContext->BulkReadPipe && pDeviceContext->InterruptPipe)) {
+        status = STATUS_INVALID_DEVICE_STATE;
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
+            "Device is not configured properly %!STATUS!",
+            status);
+
+        return status;
+    }
+
+    // TODO: init readers
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+
+    return status;
+}
+
+_Use_decl_annotations_
+NTSTATUS
+WireShockEvtDeviceD0Entry(
+    WDFDEVICE  Device,
+    WDF_POWER_DEVICE_STATE  PreviousState
+)
+{
+    PDEVICE_CONTEXT         pDeviceContext;
+    NTSTATUS                status;
+    BOOLEAN                 isTargetStarted;
+
+    pDeviceContext = DeviceGetContext(Device);
+    isTargetStarted = FALSE;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
+    UNREFERENCED_PARAMETER(PreviousState);
+
+    //
+    // Since continuous reader is configured for this interrupt-pipe, we must explicitly start
+    // the I/O target to get the framework to post read requests.
+    //
+    status = WdfIoTargetStart(WdfUsbTargetPipeGetIoTarget(pDeviceContext->InterruptPipe));
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "Failed to start interrupt pipe %!STATUS!", status);
+        goto End;
+    }
+
+    status = WdfIoTargetStart(WdfUsbTargetPipeGetIoTarget(pDeviceContext->BulkReadPipe));
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "Failed to start bulk read pipe %!STATUS!", status);
+        goto End;
+    }
+
+    status = WdfIoTargetStart(WdfUsbTargetPipeGetIoTarget(pDeviceContext->BulkWritePipe));
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "Failed to start bulk write pipe %!STATUS!", status);
+        goto End;
+    }
+
+    isTargetStarted = TRUE;
+
+End:
+
+    if (!NT_SUCCESS(status)) {
+        //
+        // Failure in D0Entry will lead to device being removed. So let us stop the continuous
+        // reader in preparation for the ensuing remove.
+        //
+        if (isTargetStarted) {
+            WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(pDeviceContext->InterruptPipe), WdfIoTargetCancelSentIo);
+            WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(pDeviceContext->BulkReadPipe), WdfIoTargetCancelSentIo);
+            WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(pDeviceContext->BulkWritePipe), WdfIoTargetCancelSentIo);
+        }
+    }
+
+    // TODO: implement
+    // HCI_Command_Reset(pDeviceContext);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 

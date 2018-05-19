@@ -25,7 +25,26 @@ EXTERN_C_START
 typedef struct _DEVICE_CONTEXT
 {
     WDFUSBDEVICE UsbDevice;
-    ULONG PrivateDeviceData;  // just a placeholder
+    
+    WDFUSBINTERFACE UsbInterface;
+
+    WDFUSBPIPE InterruptPipe;
+
+    WDFUSBPIPE BulkReadPipe;
+
+    WDFUSBPIPE BulkWritePipe;
+
+    BOOLEAN DisableSSP;
+
+    BOOLEAN Started;
+
+    BD_ADDR BluetoothHostAddress;
+
+    BOOLEAN Initialized;
+
+    BYTE HciVersionMajor;
+
+    BYTE LmpVersionMajor;
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
@@ -49,5 +68,6 @@ WireShockCreateDevice(
 // handle
 //
 EVT_WDF_DEVICE_PREPARE_HARDWARE WireShockEvtDevicePrepareHardware;
+EVT_WDF_DEVICE_D0_ENTRY WireShockEvtDeviceD0Entry;
 
 EXTERN_C_END
