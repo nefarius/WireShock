@@ -42,6 +42,8 @@ typedef struct _DEVICE_CONTEXT
 
     BOOLEAN Initialized;
 
+    BYTE_ARRAY HidInitReports;
+
     BYTE HciVersionMajor;
 
     BYTE LmpVersionMajor;

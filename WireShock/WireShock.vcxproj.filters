@@ -63,6 +63,12 @@
     <ClInclude Include="L2CAP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Ds3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ByteArray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Device.c">
@@ -87,6 +93,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="L2CAP.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Ds3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ByteArray.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

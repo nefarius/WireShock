@@ -22,6 +22,7 @@ Environment:
 #include <initguid.h>
 
 #include "WireShock.h"
+#include "ByteArray.h"
 #include "WireBus.h"
 #include "Public.h"
 #include "device.h"
@@ -32,6 +33,7 @@ Environment:
 #include "Interrupt.h"
 #include "Bulkrwr.h"
 #include "L2CAP.h"
+#include "Ds3.h"
 
 
 EXTERN_C_START
