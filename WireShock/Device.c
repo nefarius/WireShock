@@ -274,7 +274,7 @@ Return Value:
     }
 
     status = WireShockConfigContReaderForInterruptEndPoint(Device);
-    if (NT_SUCCESS(status)) {
+    if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
             "WireShockConfigContReaderForInterruptEndPoint failed with status %!STATUS!",
             status);
@@ -282,7 +282,7 @@ Return Value:
     }
 
     status = WireShockConfigContReaderForBulkReadEndPoint(pDeviceContext);
-    if (NT_SUCCESS(status)) {
+    if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
             "WireShockConfigContReaderForBulkReadEndPoint failed with status %!STATUS!",
             status);
