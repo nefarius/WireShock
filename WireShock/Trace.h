@@ -31,6 +31,7 @@ Environment:
         WPP_DEFINE_BIT(TRACE_INTERRUPT)                                \
         WPP_DEFINE_BIT(TRACE_BULKRWR)                                  \
         WPP_DEFINE_BIT(TRACE_DS3)                                      \
+        WPP_DEFINE_BIT(TRACE_WIREBUS)                                  \
         )                             
 
 #define WPP_FLAG_LEVEL_LOGGER(flag, level)                                  \
