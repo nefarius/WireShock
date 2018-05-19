@@ -21,9 +21,13 @@ Environment:
 #include <wdfusb.h>
 #include <initguid.h>
 
+#include "WireShock.h"
+#include "Public.h"
 #include "device.h"
 #include "queue.h"
 #include "trace.h"
+#include "Bluetooth.h"
+
 
 EXTERN_C_START
 
