@@ -1,0 +1,87 @@
+;
+; WireShock.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=USBDevice
+ClassGuid={88BAE032-5A81-49f0-BC3D-A4FF138216D6}
+Provider=%ManufacturerName%
+CatalogFile=WireShock.cat
+DriverVer=
+
+[DestinationDirs]
+DefaultDestDir = 12
+WireShock_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+WireShock.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%WireShock.DeviceDesc%=WireShock_Device, USB\VID_vvvv&PID_pppp
+
+[WireShock_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+WireShock.sys
+
+[WireShock_Device.NT.HW]
+AddReg=WireShock_AddReg
+
+[WireShock_AddReg]
+; By default, USBDevice class uses iProduct descriptor to name the device in
+; Device Manager on Windows 8 and higher.
+; Uncomment for this device to use %DeviceName% on Windows 8 and higher:
+;HKR,,FriendlyName,,%WireShock.DeviceDesc%
+
+;-------------- Service installation
+[WireShock_Device.NT.Services]
+AddService = WireShock,%SPSVCINST_ASSOCSERVICE%, WireShock_Service_Inst
+
+; -------------- WireShock driver install sections
+[WireShock_Service_Inst]
+DisplayName    = %WireShock.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\WireShock.sys
+
+;
+;--- WireShock_Device Coinstaller installation ------
+;
+
+[WireShock_Device.NT.CoInstallers]
+AddReg=WireShock_Device_CoInstaller_AddReg
+CopyFiles=WireShock_Device_CoInstaller_CopyFiles
+
+[WireShock_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[WireShock_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[WireShock_Device.NT.Wdf]
+KmdfService =  WireShock, WireShock_wdfsect
+[WireShock_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Universal Serial Bus devices"
+DiskName = "WireShock Installation Disk"
+WireShock.DeviceDesc = "WireShock Device"
+WireShock.SVCDESC = "WireShock Service"
+REG_MULTI_SZ = 0x00010000
