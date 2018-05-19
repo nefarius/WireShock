@@ -51,6 +51,12 @@
     <ClInclude Include="WireBus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HCI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Interrupt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Device.c">
@@ -63,6 +69,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WireBus.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HCI.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Interrupt.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

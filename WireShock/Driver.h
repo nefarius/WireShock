@@ -28,6 +28,8 @@ Environment:
 #include "queue.h"
 #include "trace.h"
 #include "Bluetooth.h"
+#include "HCI.h"
+#include "Interrupt.h"
 
 
 EXTERN_C_START

@@ -40,6 +40,8 @@
   <ItemGroup>
     <ClCompile Include="Device.c" />
     <ClCompile Include="Driver.c" />
+    <ClCompile Include="HCI.c" />
+    <ClCompile Include="Interrupt.c" />
     <ClCompile Include="Queue.c" />
     <ClCompile Include="WireBus.c" />
   </ItemGroup>
@@ -47,6 +49,8 @@
     <ClInclude Include="Bluetooth.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="Driver.h" />
+    <ClInclude Include="HCI.h" />
+    <ClInclude Include="Interrupt.h" />
     <ClInclude Include="WireBus.h" />
     <ClInclude Include="WireShock.h" />
     <ClInclude Include="Public.h" />
