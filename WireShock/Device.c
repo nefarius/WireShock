@@ -55,11 +55,11 @@ Return Value:
     PAGED_CODE();
 
     WDF_CHILD_LIST_CONFIG_INIT(
-        &childListCfg, 
-        sizeof(PDO_IDENTIFICATION_DESCRIPTION), 
+        &childListCfg,
+        sizeof(PDO_IDENTIFICATION_DESCRIPTION),
         WireShockEvtWdfChildListCreateDevice
     );
-    
+
     WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_BUS_EXTENDER);
     WdfDeviceInitSetExclusive(DeviceInit, TRUE);
 
@@ -87,7 +87,7 @@ Return Value:
         // run under framework verifier mode.
         //
         deviceContext = DeviceGetContext(device);
-                
+
 
         //
         // Create a device interface so that applications can find and talk
@@ -148,7 +148,7 @@ Return Value:
 
     PAGED_CODE();
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
 
     status = STATUS_SUCCESS;
     pDeviceContext = DeviceGetContext(Device);
@@ -273,9 +273,23 @@ Return Value:
         return status;
     }
 
-    // TODO: init readers
+    status = WireShockConfigContReaderForInterruptEndPoint(Device);
+    if (NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
+            "WireShockConfigContReaderForInterruptEndPoint failed with status %!STATUS!",
+            status);
+        return status;
+    }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+    status = WireShockConfigContReaderForBulkReadEndPoint(pDeviceContext);
+    if (NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
+            "WireShockConfigContReaderForBulkReadEndPoint failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit");
 
     return status;
 }
@@ -336,8 +350,7 @@ End:
         }
     }
 
-    // TODO: implement
-    // HCI_Command_Reset(pDeviceContext);
+    HCI_Command_Reset(pDeviceContext);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 

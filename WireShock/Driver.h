@@ -30,6 +30,7 @@ Environment:
 #include "Bluetooth.h"
 #include "HCI.h"
 #include "Interrupt.h"
+#include "Bulkrwr.h"
 
 
 EXTERN_C_START

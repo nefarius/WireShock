@@ -38,6 +38,7 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Bulkrwr.c" />
     <ClCompile Include="Device.c" />
     <ClCompile Include="Driver.c" />
     <ClCompile Include="HCI.c" />
@@ -47,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bluetooth.h" />
+    <ClInclude Include="Bulkrwr.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="Driver.h" />
     <ClInclude Include="HCI.h" />

@@ -57,6 +57,9 @@
     <ClInclude Include="Interrupt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Bulkrwr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Device.c">
@@ -75,6 +78,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Interrupt.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Bulkrwr.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
