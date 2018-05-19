@@ -89,8 +89,11 @@ WireShockEvtUsbBulkReadReadersFailed(
 )
 {
     UNREFERENCED_PARAMETER(Pipe);
-    UNREFERENCED_PARAMETER(Status);
-    UNREFERENCED_PARAMETER(UsbdStatus);
+
+    TraceEvents(TRACE_LEVEL_ERROR,
+        TRACE_BULKRWR,
+        "Reading bulk endpoint failed with status %!STATUS! (UsbdStatus: 0x%X)",
+        Status, UsbdStatus);
 
     return TRUE;
 }
