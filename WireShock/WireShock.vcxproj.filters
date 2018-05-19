@@ -48,6 +48,9 @@
     <ClInclude Include="WireShock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WireBus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Device.c">
@@ -57,6 +60,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Queue.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WireBus.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

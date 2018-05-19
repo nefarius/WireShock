@@ -1,0 +1,3 @@
+#pragma once
+
+EVT_WDF_CHILD_LIST_CREATE_DEVICE WireShockEvtWdfChildListCreateDevice;

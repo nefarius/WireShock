@@ -22,6 +22,7 @@ Environment:
 #include <initguid.h>
 
 #include "WireShock.h"
+#include "WireBus.h"
 #include "Public.h"
 #include "device.h"
 #include "queue.h"

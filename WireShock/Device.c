@@ -50,11 +50,22 @@ Return Value:
     PDEVICE_CONTEXT deviceContext;
     WDFDEVICE device;
     NTSTATUS status;
+    WDF_CHILD_LIST_CONFIG childListCfg;
 
     PAGED_CODE();
 
+    WDF_CHILD_LIST_CONFIG_INIT(
+        &childListCfg, 
+        sizeof(PDO_IDENTIFICATION_DESCRIPTION), 
+        WireShockEvtWdfChildListCreateDevice
+    );
+    
     WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_BUS_EXTENDER);
     WdfDeviceInitSetExclusive(DeviceInit, TRUE);
+
+    WdfFdoInitSetDefaultChildListConfig(DeviceInit,
+        &childListCfg,
+        WDF_NO_OBJECT_ATTRIBUTES);
 
     WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&pnpPowerCallbacks);
     pnpPowerCallbacks.EvtDevicePrepareHardware = WireShockEvtDevicePrepareHardware;
