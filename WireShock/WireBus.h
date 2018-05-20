@@ -1,3 +1,4 @@
 #pragma once
 
 EVT_WDF_CHILD_LIST_CREATE_DEVICE WireShockEvtWdfChildListCreateDevice;
+EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL WireChildEvtWdfIoQueueIoInternalDeviceControl;
