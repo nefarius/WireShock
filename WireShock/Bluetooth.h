@@ -67,11 +67,6 @@ typedef struct _BTH_HANDLE_PAIR
 typedef struct _BTH_DEVICE
 {
     //
-    // MAC address identifying this device
-    // 
-    BD_ADDR ClientAddress;
-
-    //
     // Handle identifying the parent host controller of this device
     // 
     BTH_HANDLE HCI_ConnectionHandle;
@@ -125,11 +120,6 @@ typedef struct _BTH_DEVICE
     // Framework queue storing HID input requests
     // 
     WDFQUEUE HidInputReportQueue;
-
-    //
-    // Pointer to next device in the list
-    // 
-    struct _BTH_DEVICE *next;
 
 } BTH_DEVICE, *PBTH_DEVICE;
 
@@ -196,3 +186,19 @@ typedef struct _PDO_IDENTIFICATION_DESCRIPTION
     BD_ADDR ClientAddress;
 
 } PDO_IDENTIFICATION_DESCRIPTION, *PPDO_IDENTIFICATION_DESCRIPTION;
+
+typedef struct _PDO_DEVICE_DATA
+{
+    //
+    // MAC address identifying this device
+    // 
+    BD_ADDR ClientAddress;
+
+    //
+    // Child device state information
+    // 
+    BTH_DEVICE ClientDevice;
+
+} PDO_DEVICE_DATA, *PPDO_DEVICE_DATA;
+
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(PDO_DEVICE_DATA, PdoGetData)
