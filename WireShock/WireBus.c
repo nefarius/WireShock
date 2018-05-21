@@ -198,6 +198,8 @@ WireShockEvtWdfChildListAddressDescriptionCleanup(
 {
     PPDO_ADDRESS_DESCRIPTION    pAddrDesc;
 
+    UNREFERENCED_PARAMETER(ChildList);
+
     pAddrDesc = CONTAINING_RECORD(
         AddressDescription,
         PDO_ADDRESS_DESCRIPTION,
