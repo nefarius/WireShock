@@ -184,7 +184,7 @@ WireShockEvtUsbInterruptPipeReadComplete(
     size_t                          buflen;
     PBTH_DEVICE                     pClientDevice;
     PDO_IDENTIFICATION_DESCRIPTION  pChildDesc;
-
+    
     UNREFERENCED_PARAMETER(Pipe);
 
     // TODO: remove!

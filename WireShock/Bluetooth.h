@@ -123,21 +123,6 @@ typedef struct _BTH_DEVICE
 
 } BTH_DEVICE, *PBTH_DEVICE;
 
-/**
-* \typedef struct _BTH_DEVICE_LIST
-*
-* \brief   Defines a linked list of Bluetooth client devices.
-*/
-typedef struct _BTH_DEVICE_LIST
-{
-    ULONG logicalLength;
-
-    PBTH_DEVICE head;
-
-    PBTH_DEVICE tail;
-
-} BTH_DEVICE_LIST, *PBTH_DEVICE_LIST;
-
 #define BD_ADDR_FROM_BUFFER(_addr_, _buf_)      (RtlCopyMemory(&_addr_, _buf_, sizeof(BD_ADDR)));
 
 /**
@@ -186,6 +171,17 @@ typedef struct _PDO_IDENTIFICATION_DESCRIPTION
     BD_ADDR ClientAddress;
 
 } PDO_IDENTIFICATION_DESCRIPTION, *PPDO_IDENTIFICATION_DESCRIPTION;
+
+typedef struct _WIRESHOCK_CHILD_ADDRESS_DESCRIPTION
+{
+    WDF_CHILD_ADDRESS_DESCRIPTION_HEADER  AddressHeader;
+
+    //
+    // Handle which identifies the device on the Bluetooth stack
+    // 
+    BTH_HANDLE ClientHandle;
+
+} WIRESHOCK_CHILD_ADDRESS_DESCRIPTION, *PWIRESHOCK_CHILD_ADDRESS_DESCRIPTION;
 
 typedef struct _PDO_DEVICE_DATA
 {
