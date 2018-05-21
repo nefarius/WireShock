@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Inf Include="WireShock.inf" />
+    <Inf Include="WireShockHidDevice.inf" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4D5E47F6-D7F1-4DFC-947C-DE8A4D8BBFAF}</ProjectGuid>
