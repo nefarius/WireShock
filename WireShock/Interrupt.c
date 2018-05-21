@@ -611,9 +611,6 @@ WireShockEvtUsbInterruptPipeReadComplete(
                     status);
             }
 
-            // TODO: implement update of child properties
-            //BTH_DEVICE_LIST_SET_HANDLE(&pDeviceContext->ClientDeviceList, &clientAddr, &clientHandle);
-
             status = HCI_Command_Remote_Name_Request(pDeviceContext, clientAddr);
         }
         else
