@@ -109,6 +109,10 @@ WireShockEvtUsbBulkReadPipeReadComplete(
     UNREFERENCED_PARAMETER(Buffer);
     UNREFERENCED_PARAMETER(NumBytesTransferred);
     UNREFERENCED_PARAMETER(Context);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Entry");
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Exit");
 }
 
 BOOLEAN
