@@ -568,6 +568,17 @@ WireShockEvtUsbInterruptPipeReadComplete(
             sizeof(PDO_ADDRESS_DESCRIPTION)
         );
 
+        status = WdfChildListRetrieveAddressDescription(
+            WdfFdoGetDefaultChildList(Device),
+            &childDesc.Header,
+            &childAddrDesc.Header);
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_WARNING,
+                TRACE_INTERRUPT,
+                "WdfChildListRetrieveAddressDescription failed with status %!STATUS!",
+                status);
+        }
+
         //
         // Invoke new child creation
         // 
@@ -579,14 +590,30 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
         if (!NT_SUCCESS(status))
         {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_INTERRUPT,
                 "WdfChildListAddOrUpdateChildDescriptionAsPresent failed with status %!STATUS!",
                 status);
             break;
         }
 
         status = HCI_Command_Delete_Stored_Link_Key(pDeviceContext, clientAddr);
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_INTERRUPT,
+                "HCI_Command_Delete_Stored_Link_Key failed with status %!STATUS!",
+                status);
+            break;
+        }
+
         status = HCI_Command_Accept_Connection_Request(pDeviceContext, clientAddr, 0x00);
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_INTERRUPT,
+                "HCI_Command_Accept_Connection_Request failed with status %!STATUS!",
+                status);
+            break;
+        }
 
         break;
 
