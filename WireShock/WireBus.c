@@ -29,10 +29,7 @@ WireShockEvtWdfChildListCreateDevice(
     WDF_IO_QUEUE_CONFIG             defaultQueueCfg;
     WDFQUEUE                        defaultQueue;
 
-    //DECLARE_CONST_UNICODE_STRING(compatId00, L"USB\\Class_03&SubClass_00&Prot_00");
-    //DECLARE_CONST_UNICODE_STRING(compatId01, L"USB\\Class_03&SubClass_00");
-    //DECLARE_CONST_UNICODE_STRING(compatId02, L"USB\\Class_03");
-    DECLARE_CONST_UNICODE_STRING(deviceLocation, L"Toaster Bus 0");
+    DECLARE_CONST_UNICODE_STRING(deviceLocation, L"WireShock Bus Device");
     DECLARE_UNICODE_STRING_SIZE(buffer, 1024);
     DECLARE_UNICODE_STRING_SIZE(deviceId, 1024);
     PCWSTR HardwareIds = L"Nefarius\\WireShockHidDevice\0\0";
@@ -86,32 +83,6 @@ WireShockEvtWdfChildListCreateDevice(
         return status;
     }
 
-    /*
-    status = WdfPdoInitAddCompatibleID(ChildInit, &compatId00);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
-            "WdfPdoInitAddCompatibleID (#0) failed with status %!STATUS!",
-            status);
-        return status;
-    }
-
-    status = WdfPdoInitAddCompatibleID(ChildInit, &compatId01);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
-            "WdfPdoInitAddCompatibleID (#1) failed with status %!STATUS!",
-            status);
-        return status;
-    }
-
-    status = WdfPdoInitAddCompatibleID(ChildInit, &compatId02);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
-            "WdfPdoInitAddCompatibleID (#2) failed with status %!STATUS!",
-            status);
-        return status;
-    }
-    */
-
     status = RtlUnicodeStringPrintf(&buffer, L"%02d", SerialNo);
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
@@ -138,8 +109,7 @@ WireShockEvtWdfChildListCreateDevice(
     // precedence over the DeviceDesc from the INF file.
     //
     status = RtlUnicodeStringPrintf(&buffer,
-        L"Microsoft_Eliyas_Toaster_%02d",
-        SerialNo);
+        L"WireShock HID Device");
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
             "RtlUnicodeStringPrintf failed with status %!STATUS!",
