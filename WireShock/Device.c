@@ -136,7 +136,6 @@ Return Value:
 {
     NTSTATUS status;
     PDEVICE_CONTEXT pDeviceContext;
-    WDF_USB_DEVICE_CREATE_CONFIG createParams;
     WDF_USB_DEVICE_SELECT_CONFIG_PARAMS configParams;
     WDFUSBPIPE                          pipe;
     WDF_USB_PIPE_INFORMATION            pipeInfo;
@@ -166,18 +165,7 @@ Return Value:
     //
     if (pDeviceContext->UsbDevice == NULL) {
 
-        //
-        // Specifying a client contract version of 602 enables us to query for
-        // and use the new capabilities of the USB driver stack for Windows 8.
-        // It also implies that we conform to rules mentioned in MSDN
-        // documentation for WdfUsbTargetDeviceCreateWithParameters.
-        //
-        WDF_USB_DEVICE_CREATE_CONFIG_INIT(&createParams,
-            USBD_CLIENT_CONTRACT_VERSION_602
-        );
-
-        status = WdfUsbTargetDeviceCreateWithParameters(Device,
-            &createParams,
+        status = WdfUsbTargetDeviceCreate(Device,
             WDF_NO_OBJECT_ATTRIBUTES,
             &pDeviceContext->UsbDevice
         );

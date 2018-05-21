@@ -558,3 +558,38 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");
 }
+
+NTSTATUS WireBusSetChildHandle(WDFDEVICE Device, PBD_ADDR Address, PBTH_HANDLE Handle)
+{
+    NTSTATUS                                status = STATUS_SUCCESS;
+    WDFCHILDLIST                            list;
+    PDO_IDENTIFICATION_DESCRIPTION          childIdDesc;
+    PDO_ADDRESS_DESCRIPTION     childAddrDesc;
+
+    list = WdfFdoGetDefaultChildList(Device);
+
+    WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER_INIT(
+        &childIdDesc.Header,
+        sizeof(PDO_IDENTIFICATION_DESCRIPTION)
+    );
+    WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(
+        &childAddrDesc.Header,
+        sizeof(PDO_ADDRESS_DESCRIPTION)
+    );
+
+    childIdDesc.ClientAddress = *Address;
+
+    status = WdfChildListRetrieveAddressDescription(
+        list,
+        &childIdDesc.Header,
+        &childAddrDesc.Header
+    );
+
+    if (!NT_SUCCESS(status)) {
+        return status;
+    }
+
+    childAddrDesc.ClientHandle = *Handle;
+
+    return status;
+}

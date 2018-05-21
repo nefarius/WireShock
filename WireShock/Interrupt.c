@@ -184,8 +184,8 @@ WireShockEvtUsbInterruptPipeReadComplete(
     size_t                                  buflen;
     PBTH_DEVICE                             pClientDevice;
     PDO_IDENTIFICATION_DESCRIPTION          childDesc;
-    WIRESHOCK_CHILD_ADDRESS_DESCRIPTION     childAddrDesc;
-    
+    PDO_ADDRESS_DESCRIPTION                 childAddrDesc;
+
     UNREFERENCED_PARAMETER(Pipe);
 
     // TODO: remove!
@@ -562,22 +562,36 @@ WireShockEvtUsbInterruptPipeReadComplete(
         );
 
         childDesc.ClientAddress = clientAddr;
-
+                
         WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(
-            &childAddrDesc.AddressHeader,
-            sizeof(WIRESHOCK_CHILD_ADDRESS_DESCRIPTION)
+            &childAddrDesc.Header,
+            sizeof(childAddrDesc)
         );
 
         status = WdfChildListAddOrUpdateChildDescriptionAsPresent(
             WdfFdoGetDefaultChildList(Device),
             &childDesc.Header,
-            &childAddrDesc.AddressHeader
+            NULL
         );
-        
+
         if (!NT_SUCCESS(status))
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
-                "WdfChildListAddOrUpdateChildDescriptionAsPresent failed with status %!STATUS!",
+                "WdfChildListAddOrUpdateChildDescriptionAsPresent #01 failed with status %!STATUS!",
+                status);
+            break;
+        }
+
+        status = WdfChildListAddOrUpdateChildDescriptionAsPresent(
+            WdfFdoGetDefaultChildList(Device),
+            &childDesc.Header,
+            &childAddrDesc.Header
+        );
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
+                "WdfChildListAddOrUpdateChildDescriptionAsPresent #02 failed with status %!STATUS!",
                 status);
             break;
         }
@@ -603,6 +617,13 @@ WireShockEvtUsbInterruptPipeReadComplete(
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LSB/MSB: %02X %02X", clientHandle.Lsb, clientHandle.Msb);
 
             BD_ADDR_FROM_BUFFER(clientAddr, &buffer[5]);
+
+            status = WireBusSetChildHandle(Device, &clientAddr, &clientHandle);
+            if (!NT_SUCCESS(status)) {
+                TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
+                    "WireBusSetChildHandle failed with status %!STATUS!",
+                    status);
+            }
 
             // TODO: implement update of child properties
             //BTH_DEVICE_LIST_SET_HANDLE(&pDeviceContext->ClientDeviceList, &clientAddr, &clientHandle);
