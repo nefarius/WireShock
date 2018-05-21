@@ -498,7 +498,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
 
         status = WdfRequestRetrieveOutputMemory(Request, &memory);
         if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_ERROR, 
+            TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_WIREBUS,
                 "WdfRequestRetrieveOutputMemory failed with status %!STATUS!",
                 status);
@@ -512,9 +512,9 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
 
         if (bytesToCopy == 0) {
             status = STATUS_INVALID_DEVICE_STATE;
-            TraceEvents(TRACE_LEVEL_ERROR, 
+            TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_WIREBUS,
-                "G_DefaultHidDescriptor's reportLenght is zero, %!STATUS!", 
+                "G_DefaultHidDescriptor's reportLenght is zero, %!STATUS!",
                 status);
             break;
         }
@@ -524,9 +524,9 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
             (PVOID)G_DefaultReportDescriptor,
             bytesToCopy);
         if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_ERROR, 
+            TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_WIREBUS,
-                "WdfMemoryCopyFromBuffer failed  with status %!STATUS!", 
+                "WdfMemoryCopyFromBuffer failed  with status %!STATUS!",
                 status);
             break;
         }
@@ -561,10 +561,12 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
 
 NTSTATUS WireBusSetChildHandle(WDFDEVICE Device, PBD_ADDR Address, PBTH_HANDLE Handle)
 {
-    NTSTATUS                                status = STATUS_SUCCESS;
+    NTSTATUS                                status;
     WDFCHILDLIST                            list;
     PDO_IDENTIFICATION_DESCRIPTION          childIdDesc;
-    PDO_ADDRESS_DESCRIPTION     childAddrDesc;
+    PDO_ADDRESS_DESCRIPTION                 childAddrDesc;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
 
     list = WdfFdoGetDefaultChildList(Device);
 
@@ -578,18 +580,17 @@ NTSTATUS WireBusSetChildHandle(WDFDEVICE Device, PBD_ADDR Address, PBTH_HANDLE H
     );
 
     childIdDesc.ClientAddress = *Address;
+    childAddrDesc.ClientHandle = *Handle;
 
-    status = WdfChildListRetrieveAddressDescription(
+    status = WdfChildListAddOrUpdateChildDescriptionAsPresent(
         list,
         &childIdDesc.Header,
         &childAddrDesc.Header
     );
 
-    if (!NT_SUCCESS(status)) {
-        return status;
-    }
+    status = (status == STATUS_OBJECT_NAME_EXISTS) ? STATUS_SUCCESS : status;
 
-    childAddrDesc.ClientHandle = *Handle;
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit with status %!STATUS!", status);
 
     return status;
 }

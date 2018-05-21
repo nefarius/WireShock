@@ -60,6 +60,8 @@ Return Value:
         WireShockEvtWdfChildListCreateDevice
     );
 
+    childListCfg.AddressDescriptionSize = sizeof(PDO_ADDRESS_DESCRIPTION);
+
     WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_BUS_EXTENDER);
     WdfDeviceInitSetExclusive(DeviceInit, TRUE);
 

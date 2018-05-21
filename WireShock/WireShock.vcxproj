@@ -180,6 +180,7 @@
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)bin\$(DDKPlatform)\</OutDir>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
+    <ApiValidator_Enable>false</ApiValidator_Enable>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -190,6 +191,7 @@
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)bin\$(DDKPlatform)\</OutDir>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
+    <ApiValidator_Enable>false</ApiValidator_Enable>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>

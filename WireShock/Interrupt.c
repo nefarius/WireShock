@@ -562,25 +562,11 @@ WireShockEvtUsbInterruptPipeReadComplete(
         );
 
         childDesc.ClientAddress = clientAddr;
-                
+
         WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(
             &childAddrDesc.Header,
-            sizeof(childAddrDesc)
+            sizeof(PDO_ADDRESS_DESCRIPTION)
         );
-
-        status = WdfChildListAddOrUpdateChildDescriptionAsPresent(
-            WdfFdoGetDefaultChildList(Device),
-            &childDesc.Header,
-            NULL
-        );
-
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
-                "WdfChildListAddOrUpdateChildDescriptionAsPresent #01 failed with status %!STATUS!",
-                status);
-            break;
-        }
 
         status = WdfChildListAddOrUpdateChildDescriptionAsPresent(
             WdfFdoGetDefaultChildList(Device),
@@ -591,7 +577,7 @@ WireShockEvtUsbInterruptPipeReadComplete(
         if (!NT_SUCCESS(status))
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
-                "WdfChildListAddOrUpdateChildDescriptionAsPresent #02 failed with status %!STATUS!",
+                "WdfChildListAddOrUpdateChildDescriptionAsPresent failed with status %!STATUS!",
                 status);
             break;
         }
