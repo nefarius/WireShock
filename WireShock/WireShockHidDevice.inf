@@ -16,15 +16,13 @@ CatalogFile = WireShockHidDevice.cat
 ;   driver signing.
 
 [SourceDisksFiles]
-hidkmdf.sys     = 99
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=99 ; make sure the number matches with SourceDisksNames
+; none, mshidkmdf.sys is shipped with Windows 7 upwards
 
 [SourceDisksNames]
 99 = %DISK_NAME%,,,""
 
 [DestinationDirs]
 CopyFunctionDriver  = 12
-WireShockHidDevice.Inst_CoInstaller_CopyFiles = 11
 
 [Manufacturer]
 %ManufacturerName%  = Standard,NT$ARCH$.6.1
@@ -39,7 +37,7 @@ WireShockHidDevice.Inst_CoInstaller_CopyFiles = 11
 ;   Use the inbox mshidkmdf.sys as the shim
 ;===============================================================
 [WireShockHidDevice.Inst.Win7.NT]
-; No special driver, just install mshidkmdf
+; No special driver, just install mshidkmdf.sys
 
 [WireShockHidDevice.Inst.Win7.NT.HW]
 AddReg = WireShockHidDevice_Win7_Parameters.AddReg 
@@ -77,25 +75,6 @@ HKR,,"SelectiveSuspendEnabled",0x00000001,0x1
 [customCollection.Inst.NT.Services]
 AddService = ,0x00000002,   ; NULL Service
 
-;================================================================
-; WDF Coinstaller installation
-;===============================================================
-
-[WireShockHidDevice.Inst.NT.CoInstallers]
-AddReg=WireShockHidDevice.Inst_CoInstaller_AddReg
-CopyFiles=WireShockHidDevice.Inst_CoInstaller_CopyFiles
-
-[WireShockHidDevice.Inst_CoInstaller_AddReg]
-HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
-
-[WireShockHidDevice.Inst_CoInstaller_CopyFiles]
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,,,0x00000010    ;COPYFLG_NO_OVERWRITE (for win2k)
-
-[WireShockHidDevice.Inst.NT.Wdf]
-KmdfService = WireShockHidDevice, WireShockHidDevice_wdfsect
-
-[WireShockHidDevice_wdfsect]
-KmdfLibraryVersion = $KMDFVERSION$
 
 ;================================================================
 ; Strings section
