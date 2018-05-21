@@ -171,19 +171,20 @@ WireShockEvtUsbInterruptPipeReadComplete(
     WDFCONTEXT  Context
 )
 {
-    NTSTATUS                        status = STATUS_INVALID_PARAMETER;
-    WDFDEVICE                       Device = Context;
-    PDEVICE_CONTEXT                 pDeviceContext;
-    PUCHAR                          buffer;
-    HCI_EVENT                       event;
-    HCI_COMMAND                     command;
-    BD_ADDR                         clientAddr;
-    BTH_HANDLE                      clientHandle;
-    WDFREQUEST                      removalRequest;
-    //PAIRBENDER_GET_CLIENT_REMOVAL   pRemoval;
-    size_t                          buflen;
-    PBTH_DEVICE                     pClientDevice;
-    PDO_IDENTIFICATION_DESCRIPTION  pChildDesc;
+    NTSTATUS                                status = STATUS_INVALID_PARAMETER;
+    WDFDEVICE                               Device = Context;
+    PDEVICE_CONTEXT                         pDeviceContext;
+    PUCHAR                                  buffer;
+    HCI_EVENT                               event;
+    HCI_COMMAND                             command;
+    BD_ADDR                                 clientAddr;
+    BTH_HANDLE                              clientHandle;
+    WDFREQUEST                              removalRequest;
+    //PAIRBENDER_GET_CLIENT_REMOVAL           pRemoval;
+    size_t                                  buflen;
+    PBTH_DEVICE                             pClientDevice;
+    PDO_IDENTIFICATION_DESCRIPTION          childDesc;
+    WIRESHOCK_CHILD_ADDRESS_DESCRIPTION     childAddrDesc;
     
     UNREFERENCED_PARAMETER(Pipe);
 
@@ -556,16 +557,21 @@ WireShockEvtUsbInterruptPipeReadComplete(
         BD_ADDR_FROM_BUFFER(clientAddr, &buffer[2]);
 
         WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER_INIT(
-            &pChildDesc.Header,
+            &childDesc.Header,
             sizeof(PDO_IDENTIFICATION_DESCRIPTION)
         );
 
-        pChildDesc.ClientAddress = clientAddr;
+        childDesc.ClientAddress = clientAddr;
+
+        WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(
+            &childAddrDesc.AddressHeader,
+            sizeof(WIRESHOCK_CHILD_ADDRESS_DESCRIPTION)
+        );
 
         status = WdfChildListAddOrUpdateChildDescriptionAsPresent(
             WdfFdoGetDefaultChildList(Device),
-            &pChildDesc.Header,
-            NULL
+            &childDesc.Header,
+            &childAddrDesc.AddressHeader
         );
         
         if (!NT_SUCCESS(status))
