@@ -189,6 +189,27 @@ WireShockEvtWdfChildListCreateDevice(
     return status;
 }
 
+_Use_decl_annotations_
+VOID
+WireShockEvtWdfChildListAddressDescriptionCleanup(
+    WDFCHILDLIST  ChildList,
+    PWDF_CHILD_ADDRESS_DESCRIPTION_HEADER  AddressDescription
+)
+{
+    PPDO_ADDRESS_DESCRIPTION    pAddrDesc;
+
+    pAddrDesc = CONTAINING_RECORD(
+        AddressDescription,
+        PDO_ADDRESS_DESCRIPTION,
+        Header
+    );
+
+    if (pAddrDesc->ChildDevice.RemoteName != NULL) {
+        ExFreePoolWithTag(pAddrDesc->ChildDevice.RemoteName, WIRESHOCK_POOL_TAG);
+        pAddrDesc->ChildDevice.RemoteName = NULL;
+    }
+}
+
 void WireChildEvtWdfIoQueueIoInternalDeviceControl(
     WDFQUEUE Queue,
     WDFREQUEST Request,
@@ -692,3 +713,4 @@ NTSTATUS WireBusSetChildDeviceRemoteName(WDFDEVICE Device, PBD_ADDR Address, PUC
 
     return status;
 }
+

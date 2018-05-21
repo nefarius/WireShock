@@ -61,6 +61,7 @@ Return Value:
     );
 
     childListCfg.AddressDescriptionSize = sizeof(PDO_ADDRESS_DESCRIPTION);
+    childListCfg.EvtChildListAddressDescriptionCleanup = WireShockEvtWdfChildListAddressDescriptionCleanup;
 
     WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_BUS_EXTENDER);
     WdfDeviceInitSetExclusive(DeviceInit, TRUE);
