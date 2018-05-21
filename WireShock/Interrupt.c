@@ -689,12 +689,6 @@ WireShockEvtUsbInterruptPipeReadComplete(
         {
             BD_ADDR_FROM_BUFFER(clientAddr, &buffer[3]);
 
-            // TODO: implement child device property update
-            /*
-            PBTH_DEVICE device = BTH_DEVICE_LIST_GET_BY_BD_ADDR(
-                &pDeviceContext->ClientDeviceList,
-                &clientAddr);
-
             ULONG length;
 
             //
@@ -706,25 +700,35 @@ WireShockEvtUsbInterruptPipeReadComplete(
                 length++);
 
             //
-            // Allocate memory for name (including null-terminator)
-            //
-            device->RemoteName = malloc(length);
-
-            //
             // Store remote name in device context
             //
-            RtlCopyMemory(device->RemoteName, &buffer[9], length);
+            status = WireBusSetChildDeviceRemoteName(
+                Device,
+                &clientAddr,
+                &buffer[9],
+                length
+            );
+            if (!NT_SUCCESS(status)) {
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_INTERRUPT,
+                    "WireBusSetChildDeviceRemoteName failed with status %!STATUS!",
+                    status);
+            }
 
             //
             // Remote name is used to distinguish device type
             //
-            device->DeviceType =
-                (strcmp("Wireless Controller", device->RemoteName) == 0) ? DualShock4 : DualShock3;
-
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
-                "Remote name: %s, length: %d, device: %d",
-                device->RemoteName, length, device->DeviceType);
-            */
+            status = WireBusSetChildDeviceType(
+                Device,
+                &clientAddr,
+                (strcmp("Wireless Controller", (LPCSTR)&buffer[9]) == 0) ? DualShock4 : DualShock3
+            );
+            if (!NT_SUCCESS(status)) {
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_INTERRUPT,
+                    "WireBusSetChildDeviceType failed with status %!STATUS!",
+                    status);
+            }
         }
 
         break;

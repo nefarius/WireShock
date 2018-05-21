@@ -580,7 +580,105 @@ NTSTATUS WireBusSetChildHandle(WDFDEVICE Device, PBD_ADDR Address, PBTH_HANDLE H
     );
 
     childIdDesc.ClientAddress = *Address;
-    childAddrDesc.ClientHandle = *Handle;
+    childAddrDesc.ChildDevice.HCI_ConnectionHandle = *Handle;
+
+    status = WdfChildListAddOrUpdateChildDescriptionAsPresent(
+        list,
+        &childIdDesc.Header,
+        &childAddrDesc.Header
+    );
+
+    status = (status == STATUS_OBJECT_NAME_EXISTS) ? STATUS_SUCCESS : status;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit with status %!STATUS!", status);
+
+    return status;
+}
+
+NTSTATUS WireBusSetChildDeviceType(WDFDEVICE Device, PBD_ADDR Address, BTH_DEVICE_TYPE DeviceType)
+{
+    NTSTATUS                                status;
+    WDFCHILDLIST                            list;
+    PDO_IDENTIFICATION_DESCRIPTION          childIdDesc;
+    PDO_ADDRESS_DESCRIPTION                 childAddrDesc;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
+
+    list = WdfFdoGetDefaultChildList(Device);
+
+    WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER_INIT(
+        &childIdDesc.Header,
+        sizeof(PDO_IDENTIFICATION_DESCRIPTION)
+    );
+    WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(
+        &childAddrDesc.Header,
+        sizeof(PDO_ADDRESS_DESCRIPTION)
+    );
+
+    childIdDesc.ClientAddress = *Address;
+
+    status = WdfChildListRetrieveAddressDescription(
+        list,
+        &childIdDesc.Header,
+        &childAddrDesc.Header);
+    if (!NT_SUCCESS(status)) {
+        return status;
+    }
+
+    childAddrDesc.ChildDevice.DeviceType = DeviceType;
+
+    status = WdfChildListAddOrUpdateChildDescriptionAsPresent(
+        list,
+        &childIdDesc.Header,
+        &childAddrDesc.Header
+    );
+
+    status = (status == STATUS_OBJECT_NAME_EXISTS) ? STATUS_SUCCESS : status;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit with status %!STATUS!", status);
+
+    return status;
+}
+
+NTSTATUS WireBusSetChildDeviceRemoteName(WDFDEVICE Device, PBD_ADDR Address, PUCHAR Buffer, ULONG BufferLength)
+{
+    NTSTATUS                                status;
+    WDFCHILDLIST                            list;
+    PDO_IDENTIFICATION_DESCRIPTION          childIdDesc;
+    PDO_ADDRESS_DESCRIPTION                 childAddrDesc;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
+
+    list = WdfFdoGetDefaultChildList(Device);
+
+    WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER_INIT(
+        &childIdDesc.Header,
+        sizeof(PDO_IDENTIFICATION_DESCRIPTION)
+    );
+    WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(
+        &childAddrDesc.Header,
+        sizeof(PDO_ADDRESS_DESCRIPTION)
+    );
+
+    childIdDesc.ClientAddress = *Address;
+
+    status = WdfChildListRetrieveAddressDescription(
+        list,
+        &childIdDesc.Header,
+        &childAddrDesc.Header);
+    if (!NT_SUCCESS(status)) {
+        return status;
+    }
+
+    if (childAddrDesc.ChildDevice.RemoteName != NULL) {
+        ExFreePoolWithTag(childAddrDesc.ChildDevice.RemoteName, WIRESHOCK_POOL_TAG);
+    }
+    childAddrDesc.ChildDevice.RemoteName = ExAllocatePoolWithTag(
+        NonPagedPoolNx,
+        BufferLength,
+        WIRESHOCK_POOL_TAG
+    );
+    RtlCopyMemory(childAddrDesc.ChildDevice.RemoteName, Buffer, BufferLength);
 
     status = WdfChildListAddOrUpdateChildDescriptionAsPresent(
         list,

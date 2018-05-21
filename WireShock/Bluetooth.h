@@ -177,31 +177,31 @@ typedef struct _PDO_ADDRESS_DESCRIPTION
     WDF_CHILD_ADDRESS_DESCRIPTION_HEADER  Header;
 
     //
-    // Handle which identifies the device on the Bluetooth stack
+    // Bluetooth child device state information
     // 
-    BTH_HANDLE ClientHandle;
+    BTH_DEVICE ChildDevice;
 
 } PDO_ADDRESS_DESCRIPTION, *PPDO_ADDRESS_DESCRIPTION;
 
-typedef struct _PDO_DEVICE_DATA
-{
-    //
-    // MAC address identifying this device
-    // 
-    BD_ADDR ClientAddress;
-
-    //
-    // Child device state information
-    // 
-    BTH_DEVICE ClientDevice;
-
-} PDO_DEVICE_DATA, *PPDO_DEVICE_DATA;
-
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(PDO_DEVICE_DATA, PdoGetData)
 
 NTSTATUS
 WireBusSetChildHandle(
     WDFDEVICE Device,
     PBD_ADDR Address,
     PBTH_HANDLE Handle
+);
+
+NTSTATUS
+WireBusSetChildDeviceType(
+    WDFDEVICE Device,
+    PBD_ADDR Address,
+    BTH_DEVICE_TYPE DeviceType
+);
+
+NTSTATUS
+WireBusSetChildDeviceRemoteName(
+    WDFDEVICE Device,
+    PBD_ADDR Address,
+    PUCHAR Buffer,
+    ULONG BufferLength
 );
