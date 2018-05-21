@@ -199,7 +199,7 @@ WireBusSetChildDeviceType(
 );
 
 NTSTATUS
-WireBusSetChildDeviceRemoteName(
+WireBusSetChildRemoteName(
     WDFDEVICE Device,
     PBD_ADDR Address,
     PUCHAR Buffer,

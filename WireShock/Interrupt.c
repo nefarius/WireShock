@@ -568,6 +568,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
             sizeof(PDO_ADDRESS_DESCRIPTION)
         );
 
+        //
+        // Invoke new child creation
+        // 
         status = WdfChildListAddOrUpdateChildDescriptionAsPresent(
             WdfFdoGetDefaultChildList(Device),
             &childDesc.Header,
@@ -702,7 +705,7 @@ WireShockEvtUsbInterruptPipeReadComplete(
             //
             // Store remote name in device context
             //
-            status = WireBusSetChildDeviceRemoteName(
+            status = WireBusSetChildRemoteName(
                 Device,
                 &clientAddr,
                 &buffer[9],

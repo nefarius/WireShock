@@ -663,7 +663,7 @@ NTSTATUS WireBusSetChildDeviceType(WDFDEVICE Device, PBD_ADDR Address, BTH_DEVIC
     return status;
 }
 
-NTSTATUS WireBusSetChildDeviceRemoteName(WDFDEVICE Device, PBD_ADDR Address, PUCHAR Buffer, ULONG BufferLength)
+NTSTATUS WireBusSetChildRemoteName(WDFDEVICE Device, PBD_ADDR Address, PUCHAR Buffer, ULONG BufferLength)
 {
     NTSTATUS                                status;
     WDFCHILDLIST                            list;
