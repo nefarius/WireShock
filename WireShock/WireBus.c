@@ -28,6 +28,8 @@ WireShockEvtWdfChildListCreateDevice(
     WDF_DEVICE_POWER_CAPABILITIES   powerCaps;
     WDF_IO_QUEUE_CONFIG             defaultQueueCfg;
     WDFQUEUE                        defaultQueue;
+    WDF_IO_QUEUE_CONFIG             inputQueueCfg;
+    PDO_ADDRESS_DESCRIPTION         addrDesc;
 
     DECLARE_CONST_UNICODE_STRING(deviceLocation, L"WireShock Bus Device");
     DECLARE_UNICODE_STRING_SIZE(buffer, MAX_DEVICE_ID_LEN);
@@ -196,6 +198,34 @@ WireShockEvtWdfChildListCreateDevice(
         TraceEvents(TRACE_LEVEL_ERROR,
             TRACE_WIREBUS,
             "WdfIoQueueCreate (Default) failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+#pragma endregion
+
+#pragma region HID Input Report Queue creation
+
+    WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(&addrDesc.Header, sizeof(addrDesc));
+
+    status = WdfPdoRetrieveAddressDescription(hChild, &addrDesc.Header);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
+            "WdfPdoRetrieveAddressDescription failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    WDF_IO_QUEUE_CONFIG_INIT(&inputQueueCfg, WdfIoQueueDispatchManual);
+    status = WdfIoQueueCreate(
+        hChild, 
+        &inputQueueCfg, 
+        WDF_NO_OBJECT_ATTRIBUTES, 
+        &addrDesc.ChildDevice.HidInputReportQueue
+    );
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
+            "WdfIoQueueCreate failed with status %!STATUS!",
             status);
         return status;
     }
