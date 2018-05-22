@@ -714,6 +714,11 @@ NTSTATUS WireBusSetChildRemoteName(WDFDEVICE Device, PBD_ADDR Address, PUCHAR Bu
         );
         RtlCopyMemory(childAddrDesc.ChildDevice.RemoteName, Buffer, BufferLength);
 
+        TraceEvents(TRACE_LEVEL_INFORMATION, 
+            TRACE_WIREBUS, 
+            "Set device name to: %s",
+            childAddrDesc.ChildDevice.RemoteName);
+
         WIREBUS_SET_PDO_ADDRESS_DESCRIPTION(Device, Address, &childAddrDesc);
     }
 
