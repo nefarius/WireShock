@@ -180,6 +180,9 @@ WireShockEvtUsbBulkReadPipeReadComplete(
 
     BTH_HANDLE_FROM_BUFFER(clientHandle, buffer);
 
+    //
+    // Fetch child device matching connection handle
+    // 
     if (!WireBusGetPdoAddressDescriptionByHandle(device, &clientHandle, &addrDesc, &clientAddr)) {
         TraceEvents(TRACE_LEVEL_WARNING, TRACE_BULKRWR,
             "WireBusGetPdoAddressDescriptionByHandle failed for %02X %02X",
@@ -320,6 +323,9 @@ WireShockEvtUsbBulkReadPipeReadComplete(
             &CID);
     }
 
+    //
+    // Write back state changes
+    // 
     if (!WireBusSetPdoAddressDescription(device, &clientAddr, &addrDesc)) {
         TraceEvents(TRACE_LEVEL_WARNING,
             TRACE_BULKRWR,
