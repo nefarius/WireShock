@@ -230,6 +230,14 @@ WireShockEvtWdfChildListCreateDevice(
         return status;
     }
 
+    status = WdfPdoUpdateAddressDescription(hChild, &addrDesc.Header);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
+            "WdfPdoUpdateAddressDescription failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
 #pragma endregion
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit with status %!STATUS!", status);
@@ -275,8 +283,8 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
     NTSTATUS                        status = STATUS_SUCCESS;
     size_t                          bytesToCopy = 0;
     WDFMEMORY                       memory;
-    WDF_REQUEST_FORWARD_OPTIONS     forwardOptions;
-    WDFDEVICE                       device, parentDevice;
+    WDFDEVICE                       device;
+    PDO_ADDRESS_DESCRIPTION         addrDesc;
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry (IoControlCode: 0x%X)", IoControlCode);
         
@@ -464,22 +472,24 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
             TRACE_WIREBUS,
             ">> IOCTL_HID_READ_REPORT");
 
-        status = STATUS_UNSUCCESSFUL;
-
         device = WdfIoQueueGetDevice(WdfRequestGetIoQueue(Request));
-        parentDevice = WdfPdoGetParent(device);
 
-        WDF_REQUEST_FORWARD_OPTIONS_INIT(&forwardOptions);
+        WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(&addrDesc.Header, sizeof(addrDesc));
 
-        status = WdfRequestForwardToParentDeviceIoQueue(
-            Request,
-            WdfDeviceGetDefaultQueue(parentDevice),
-            &forwardOptions
-        );
+        status = WdfPdoRetrieveAddressDescription(device, &addrDesc.Header);
         if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_ERROR,
+            TraceEvents(TRACE_LEVEL_ERROR, 
                 TRACE_WIREBUS,
-                "WdfRequestForwardToParentDeviceIoQueue failed  with status %!STATUS!",
+                "WdfPdoRetrieveAddressDescription failed with status %!STATUS!",
+                status);
+            break;
+        }
+
+        status = WdfRequestForwardToIoQueue(Request, addrDesc.ChildDevice.HidInputReportQueue);
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR, 
+                TRACE_WIREBUS,
+                "WdfRequestForwardToIoQueue failed with status %!STATUS!",
                 status);
             break;
         }
