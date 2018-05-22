@@ -634,12 +634,7 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
             BD_ADDR_FROM_BUFFER(clientAddr, &buffer[5]);
 
-            status = WireBusSetChildHandle(Device, &clientAddr, &clientHandle);
-            if (!NT_SUCCESS(status)) {
-                TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
-                    "WireBusSetChildHandle failed with status %!STATUS!",
-                    status);
-            }
+            WireBusSetChildHandle(Device, &clientAddr, &clientHandle);
 
             status = HCI_Command_Remote_Name_Request(pDeviceContext, clientAddr);
         }
@@ -732,33 +727,21 @@ WireShockEvtUsbInterruptPipeReadComplete(
             //
             // Store remote name in device context
             //
-            status = WireBusSetChildRemoteName(
+            WireBusSetChildRemoteName(
                 Device,
                 &clientAddr,
                 &buffer[9],
                 length
             );
-            if (!NT_SUCCESS(status)) {
-                TraceEvents(TRACE_LEVEL_INFORMATION,
-                    TRACE_INTERRUPT,
-                    "WireBusSetChildDeviceRemoteName failed with status %!STATUS!",
-                    status);
-            }
 
             //
             // Remote name is used to distinguish device type
             //
-            status = WireBusSetChildDeviceType(
+            WireBusSetChildDeviceType(
                 Device,
                 &clientAddr,
                 (strcmp("Wireless Controller", (LPCSTR)&buffer[9]) == 0) ? DualShock4 : DualShock3
             );
-            if (!NT_SUCCESS(status)) {
-                TraceEvents(TRACE_LEVEL_INFORMATION,
-                    TRACE_INTERRUPT,
-                    "WireBusSetChildDeviceType failed with status %!STATUS!",
-                    status);
-            }
         }
 
         break;

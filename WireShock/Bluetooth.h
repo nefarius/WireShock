@@ -196,21 +196,21 @@ BOOLEAN FORCEINLINE WIREBUS_SET_PDO_ADDRESS_DESCRIPTION(
 );
 
 
-NTSTATUS
+VOID
 WireBusSetChildHandle(
     WDFDEVICE Device,
     PBD_ADDR Address,
     PBTH_HANDLE Handle
 );
 
-NTSTATUS
+VOID
 WireBusSetChildDeviceType(
     WDFDEVICE Device,
     PBD_ADDR Address,
     BTH_DEVICE_TYPE DeviceType
 );
 
-NTSTATUS
+VOID
 WireBusSetChildRemoteName(
     WDFDEVICE Device,
     PBD_ADDR Address,

@@ -657,9 +657,8 @@ BOOLEAN FORCEINLINE WIREBUS_SET_PDO_ADDRESS_DESCRIPTION(
     return TRUE;
 }
 
-NTSTATUS WireBusSetChildHandle(WDFDEVICE Device, PBD_ADDR Address, PBTH_HANDLE Handle)
+VOID WireBusSetChildHandle(WDFDEVICE Device, PBD_ADDR Address, PBTH_HANDLE Handle)
 {
-    NTSTATUS                                status = STATUS_SUCCESS;
     PDO_ADDRESS_DESCRIPTION                 childAddrDesc;
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
@@ -671,14 +670,11 @@ NTSTATUS WireBusSetChildHandle(WDFDEVICE Device, PBD_ADDR Address, PBTH_HANDLE H
         WIREBUS_SET_PDO_ADDRESS_DESCRIPTION(Device, Address, &childAddrDesc);
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit with status %!STATUS!", status);
-
-    return status;
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");
 }
 
-NTSTATUS WireBusSetChildDeviceType(WDFDEVICE Device, PBD_ADDR Address, BTH_DEVICE_TYPE DeviceType)
+VOID WireBusSetChildDeviceType(WDFDEVICE Device, PBD_ADDR Address, BTH_DEVICE_TYPE DeviceType)
 {
-    NTSTATUS                                status = STATUS_SUCCESS;
     PDO_ADDRESS_DESCRIPTION                 childAddrDesc;
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
@@ -690,14 +686,11 @@ NTSTATUS WireBusSetChildDeviceType(WDFDEVICE Device, PBD_ADDR Address, BTH_DEVIC
         WIREBUS_SET_PDO_ADDRESS_DESCRIPTION(Device, Address, &childAddrDesc);
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit with status %!STATUS!", status);
-
-    return status;
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");
 }
 
-NTSTATUS WireBusSetChildRemoteName(WDFDEVICE Device, PBD_ADDR Address, PUCHAR Buffer, ULONG BufferLength)
+VOID WireBusSetChildRemoteName(WDFDEVICE Device, PBD_ADDR Address, PUCHAR Buffer, ULONG BufferLength)
 {
-    NTSTATUS                                status = STATUS_SUCCESS;
     PDO_ADDRESS_DESCRIPTION                 childAddrDesc;
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
@@ -722,8 +715,6 @@ NTSTATUS WireBusSetChildRemoteName(WDFDEVICE Device, PBD_ADDR Address, PUCHAR Bu
         WIREBUS_SET_PDO_ADDRESS_DESCRIPTION(Device, Address, &childAddrDesc);
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit with status %!STATUS!", status);
-
-    return status;
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");
 }
 
