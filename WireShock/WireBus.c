@@ -30,10 +30,9 @@ WireShockEvtWdfChildListCreateDevice(
     WDFQUEUE                        defaultQueue;
 
     DECLARE_CONST_UNICODE_STRING(deviceLocation, L"WireShock Bus Device");
-    DECLARE_UNICODE_STRING_SIZE(buffer, 1024);
-    DECLARE_UNICODE_STRING_SIZE(deviceId, 1024);
+    DECLARE_UNICODE_STRING_SIZE(buffer, MAX_DEVICE_ID_LEN);
+    DECLARE_UNICODE_STRING_SIZE(deviceId, MAX_DEVICE_ID_LEN);
     PCWSTR HardwareIds = L"Nefarius\\WireShockHidDevice\0\0";
-    ULONG SerialNo = 1;
 
 
     PAGED_CODE();
@@ -47,7 +46,7 @@ WireShockEvtWdfChildListCreateDevice(
 
     TraceEvents(TRACE_LEVEL_INFORMATION,
         TRACE_WIREBUS,
-        "Would plug in device with address %02X:%02X:%02X:%02X:%02X:%02X",
+        "Plugging in device with address %02X:%02X:%02X:%02X:%02X:%02X",
         pDesc->ClientAddress.Address[0],
         pDesc->ClientAddress.Address[1],
         pDesc->ClientAddress.Address[2],
@@ -55,9 +54,11 @@ WireShockEvtWdfChildListCreateDevice(
         pDesc->ClientAddress.Address[4],
         pDesc->ClientAddress.Address[5]);
 
+    //
+    // PDO features
+    // 
     WdfDeviceInitSetDeviceType(ChildInit, FILE_DEVICE_BUS_EXTENDER);
     WdfPdoInitAllowForwardingRequestToParent(ChildInit);
-
 
     //
     // Provide DeviceID, HardwareIDs, CompatibleIDs and InstanceId
@@ -83,7 +84,14 @@ WireShockEvtWdfChildListCreateDevice(
         return status;
     }
 
-    status = RtlUnicodeStringPrintf(&buffer, L"%02d", SerialNo);
+    status = RtlUnicodeStringPrintf(&buffer,
+        L"%02X:%02X:%02X:%02X:%02X:%02X",
+        pDesc->ClientAddress.Address[0],
+        pDesc->ClientAddress.Address[1],
+        pDesc->ClientAddress.Address[2],
+        pDesc->ClientAddress.Address[3],
+        pDesc->ClientAddress.Address[4],
+        pDesc->ClientAddress.Address[5]);
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
             "RtlUnicodeStringPrintf failed with status %!STATUS!",
