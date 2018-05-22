@@ -27,7 +27,7 @@ SOFTWARE.
 
 NTSTATUS
 WireShockConfigContReaderForBulkReadEndPoint(
-    _In_ PDEVICE_CONTEXT DeviceContext
+    _In_ WDFDEVICE Device
 );
 
 EVT_WDF_USB_READER_COMPLETION_ROUTINE WireShockEvtUsbBulkReadPipeReadComplete;

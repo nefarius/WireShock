@@ -4,17 +4,20 @@
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 WireShockConfigContReaderForBulkReadEndPoint(
-    _In_ PDEVICE_CONTEXT DeviceContext
+    _In_ WDFDEVICE Device
 )
 {
-    WDF_USB_CONTINUOUS_READER_CONFIG contReaderConfig;
-    NTSTATUS status;
+    WDF_USB_CONTINUOUS_READER_CONFIG    contReaderConfig;
+    NTSTATUS                            status;
+    PDEVICE_CONTEXT                     pDeviceCtx;
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Entry");
 
+    pDeviceCtx = DeviceGetContext(Device);
+
     WDF_USB_CONTINUOUS_READER_CONFIG_INIT(&contReaderConfig,
         WireShockEvtUsbBulkReadPipeReadComplete,
-        DeviceContext,    // Context
+        Device,    // Context
         BULK_IN_BUFFER_LENGTH);   // TransferLength
 
     contReaderConfig.EvtUsbTargetPipeReadersFailed = WireShockEvtUsbBulkReadReadersFailed;
@@ -26,7 +29,7 @@ WireShockConfigContReaderForBulkReadEndPoint(
     // By defaut, framework queues two requests to the target
     // endpoint. Driver can configure up to 10 requests with CONFIG macro.
     //
-    status = WdfUsbTargetPipeConfigContinuousReader(DeviceContext->BulkReadPipe,
+    status = WdfUsbTargetPipeConfigContinuousReader(pDeviceCtx->BulkReadPipe,
         &contReaderConfig);
 
     if (!NT_SUCCESS(status)) {
@@ -150,11 +153,14 @@ WireShockEvtUsbBulkReadPipeReadComplete(
 )
 {
     NTSTATUS                        status;
-    PDEVICE_CONTEXT                 pDeviceContext = Context;
+    WDFDEVICE                       device;
+    PDEVICE_CONTEXT                 pDeviceContext;
     PUCHAR                          buffer;
     BTH_HANDLE                      clientHandle;
-    PBTH_DEVICE                     pClientDevice = NULL;
+    PBTH_DEVICE                     pClientDevice;
     L2CAP_SIGNALLING_COMMAND_CODE   code;
+    PDO_ADDRESS_DESCRIPTION         addrDesc;
+    BD_ADDR                         clientAddr;
 
     static BYTE CID = 0x01;
 
@@ -168,11 +174,21 @@ WireShockEvtUsbBulkReadPipeReadComplete(
         return;
     }
 
+    device = Context;
+    pDeviceContext = DeviceGetContext(device);
     buffer = WdfMemoryGetBuffer(Buffer, NULL);
 
     BTH_HANDLE_FROM_BUFFER(clientHandle, buffer);
 
-    //pClientDevice = BTH_DEVICE_LIST_GET_BY_HANDLE(&pDeviceContext->ClientDeviceList, &clientHandle);
+    if (!WireBusGetPdoAddressDescriptionByHandle(device, &clientHandle, &addrDesc, &clientAddr)) {
+        TraceEvents(TRACE_LEVEL_WARNING, TRACE_BULKRWR,
+            "WireBusGetPdoAddressDescriptionByHandle failed for %02X %02X",
+            clientHandle.Lsb, clientHandle.Msb
+        );
+        return;
+    }
+
+    pClientDevice = &addrDesc.ChildDevice;
 
     if (pClientDevice == NULL)
     {
@@ -302,6 +318,19 @@ WireShockEvtUsbBulkReadPipeReadComplete(
             pDeviceContext,
             pClientDevice,
             &CID);
+    }
+
+    if (!WireBusSetPdoAddressDescription(device, &clientAddr, &addrDesc)) {
+        TraceEvents(TRACE_LEVEL_WARNING,
+            TRACE_BULKRWR,
+            "WireBusSetPdoAddressDescription failed for %02X:%02X:%02X:%02X:%02X:%02X",
+            clientAddr.Address[0],
+            clientAddr.Address[1],
+            clientAddr.Address[2],
+            clientAddr.Address[3],
+            clientAddr.Address[4],
+            clientAddr.Address[5]
+        );
     }
 }
 
