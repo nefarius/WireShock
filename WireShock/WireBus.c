@@ -249,8 +249,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
     WDFDEVICE                       device, parentDevice;
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry (IoControlCode: 0x%X)", IoControlCode);
-
-    typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
+        
 
     CONST HID_REPORT_DESCRIPTOR Ds3HidReportDescriptor[] = {
         0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
