@@ -249,19 +249,19 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
     case HCI_Command_Complete_EV:
 
-        //TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Command_Complete_EV");
+        TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_INTERRUPT, "HCI_Command_Complete_EV");
 
         if (command == HCI_Reset && HCI_COMMAND_SUCCESS(buffer) && !pDeviceContext->Started)
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Reset SUCCESS");
 
             //
-            // By this time the host controller should've dropped all
+            // By this time the host controller should have dropped all
             // connections so we are safe to remove all allocated resources.
+            // The following calls will disconnect all remaining children.
             // 
-
-            // TODO: implement child list clean-up
-            //BTH_DEVICE_LIST_FREE(&pDeviceContext->ClientDeviceList);
+            WdfChildListBeginScan(WdfFdoGetDefaultChildList(Device));
+            WdfChildListEndScan(WdfFdoGetDefaultChildList(Device));
 
             pDeviceContext->Started = TRUE;
 
@@ -643,7 +643,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
         }
         else
         {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT, "HCI_Connection_Complete_EV failed: %s", HCI_ERROR_DETAIL(buffer[2]));
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT, 
+                "HCI_Connection_Complete_EV failed: %s", 
+                HCI_ERROR_DETAIL(buffer[2]));
         }
 
         break;

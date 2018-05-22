@@ -146,7 +146,7 @@ WireShockEvtWdfChildListCreateDevice(
 
     WdfPdoInitSetDefaultLocale(ChildInit, 0x409);
 
-
+#pragma region Child device creation
 
     WDF_OBJECT_ATTRIBUTES_INIT(&pdoAttributes);
 
@@ -157,6 +157,10 @@ WireShockEvtWdfChildListCreateDevice(
             status);
         return status;
     }
+
+#pragma endregion
+
+#pragma region PNP & Power Capabilities
 
     WDF_DEVICE_PNP_CAPABILITIES_INIT(&pnpCaps);
     pnpCaps.Removable = WdfTrue;
@@ -180,6 +184,10 @@ WireShockEvtWdfChildListCreateDevice(
 
     WdfDeviceSetPowerCapabilities(hChild, &powerCaps);
 
+#pragma endregion
+
+#pragma region Defailt I/O Queue creation
+
     WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&defaultQueueCfg, WdfIoQueueDispatchParallel);
     defaultQueueCfg.EvtIoInternalDeviceControl = WireChildEvtWdfIoQueueIoInternalDeviceControl;
 
@@ -191,6 +199,8 @@ WireShockEvtWdfChildListCreateDevice(
             status);
         return status;
     }
+
+#pragma endregion
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit with status %!STATUS!", status);
 
