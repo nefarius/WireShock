@@ -563,14 +563,10 @@ Ds3ProcessHidInputReport(
     UNREFERENCED_PARAMETER(Device);
     UNREFERENCED_PARAMETER(Buffer);
 
-    NTSTATUS status = STATUS_INVALID_PARAMETER;
-
-    // TODO: re-implement
-    /*
-    
-    WDFREQUEST Request;
-    PAIRBENDER_GET_DS3_INPUT_REPORT pGetDs3Input;
-    size_t bufferLength;
+    NTSTATUS    status = STATUS_INVALID_PARAMETER;
+    WDFREQUEST  Request;
+    PUCHAR      buffer;
+    size_t      bufferLength;
 
     status = WdfIoQueueRetrieveNextRequest(Device->HidInputReportQueue, &Request);
 
@@ -578,28 +574,26 @@ Ds3ProcessHidInputReport(
     {
         status = WdfRequestRetrieveOutputBuffer(
             Request,
-            sizeof(AIRBENDER_GET_DS3_INPUT_REPORT),
-            (LPVOID)&pGetDs3Input,
+            DS3_HID_INPUT_REPORT_SIZE,
+            (PVOID)&buffer,
             &bufferLength);
 
         if (!NT_SUCCESS(status))
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3,
-                "WdfRequestRetrieveOutputBuffer failed with status 0x%X", status);
+                "WdfRequestRetrieveOutputBuffer failed with status 0x%X (bufferLength: %d)",
+                status, (ULONG)bufferLength);
             WdfRequestComplete(Request, status);
             return status;
         }
 
-        pGetDs3Input->ClientAddress = Device->ClientAddress;
-
-        RtlCopyMemory(&pGetDs3Input->ReportBuffer,
+        RtlCopyMemory(buffer,
             &Buffer[9],
             DS3_HID_INPUT_REPORT_SIZE);
 
         WdfRequestCompleteWithInformation(Request, status, bufferLength);
     }
 
-    */
 
     return status;
 }
