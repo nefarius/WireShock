@@ -44,25 +44,69 @@ WireShockConfigContReaderForBulkReadEndPoint(
 NTSTATUS WriteBulkPipe(
     PDEVICE_CONTEXT Context,
     PVOID Buffer,
-    ULONG BufferLength,
-    PULONG BytesWritten)
+    ULONG BufferLength)
 {
     NTSTATUS                        status;
-    WDF_MEMORY_DESCRIPTOR           memDesc;
+    WDFREQUEST                      request;
+    WDF_OBJECT_ATTRIBUTES           attribs;
+    WDFMEMORY                       memory;
+    PVOID                           writeBufferPointer;
 
-    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(
-        &memDesc,
-        Buffer,
-        BufferLength
-    );
+    WDF_OBJECT_ATTRIBUTES_INIT(&attribs);
 
-    status = WdfUsbTargetPipeWriteSynchronously(
+    status = WdfRequestCreate(&attribs,
+        WdfUsbTargetDeviceGetIoTarget(Context->UsbDevice),
+        &request);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR,
+            "WdfRequestCreate failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    WDF_OBJECT_ATTRIBUTES_INIT(&attribs);
+    attribs.ParentObject = request;
+
+    status = WdfMemoryCreate(&attribs,
+        NonPagedPool,
+        WIRESHOCK_POOL_TAG,
+        BufferLength,
+        &memory,
+        &writeBufferPointer);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR,
+            "WdfMemoryCreate failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    RtlCopyMemory(writeBufferPointer, Buffer, BufferLength);
+
+    status = WdfUsbTargetPipeFormatRequestForWrite(
         Context->BulkWritePipe,
-        NULL,
-        NULL,
-        &memDesc,
-        BytesWritten
+        request,
+        memory,
+        NULL
     );
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR,
+            "WdfUsbTargetPipeFormatRequestForWrite failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    if (WdfRequestSend(request,
+        WdfUsbTargetDeviceGetIoTarget(Context->UsbDevice),
+        NULL) == FALSE)
+    {
+        status = WdfRequestGetStatus(request);
+    }
+
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR,
+            "WdfRequestSend failed with status %!STATUS!",
+            status);
+    }
 
     return status;
 }
@@ -90,7 +134,7 @@ HID_Command(
 
     RtlCopyMemory(&buffer[8], Buffer, BufferLength);
 
-    status = WriteBulkPipe(Context, buffer, BufferLength + 8, NULL);
+    status = WriteBulkPipe(Context, buffer, BufferLength + 8);
 
     ExFreePoolWithTag(buffer, WIRESHOCK_POOL_TAG);
 
