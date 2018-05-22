@@ -32,6 +32,7 @@ Environment:
         WPP_DEFINE_BIT(TRACE_BULKRWR)                                  \
         WPP_DEFINE_BIT(TRACE_DS3)                                      \
         WPP_DEFINE_BIT(TRACE_WIREBUS)                                  \
+        WPP_DEFINE_BIT(TRACE_BLUETOOTH)                                \
         )                             
 
 #define WPP_FLAG_LEVEL_LOGGER(flag, level)                                  \
