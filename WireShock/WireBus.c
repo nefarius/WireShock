@@ -186,7 +186,7 @@ WireShockEvtWdfChildListCreateDevice(
 
 #pragma endregion
 
-#pragma region Defailt I/O Queue creation
+#pragma region Default I/O Queue creation
 
     WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&defaultQueueCfg, WdfIoQueueDispatchParallel);
     defaultQueueCfg.EvtIoInternalDeviceControl = WireChildEvtWdfIoQueueIoInternalDeviceControl;
