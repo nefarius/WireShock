@@ -65,6 +65,7 @@ Return Value:
 
     queueConfig.EvtIoDeviceControl = WireShockEvtIoDeviceControl;
     queueConfig.EvtIoStop = WireShockEvtIoStop;
+    queueConfig.EvtIoInternalDeviceControl = WireShockEvtWdfIoQueueIoInternalDeviceControl;
 
     status = WdfIoQueueCreate(
                  Device,
@@ -183,4 +184,30 @@ Return Value:
     //
 
     return;
+}
+
+_Use_decl_annotations_
+void 
+WireShockEvtWdfIoQueueIoInternalDeviceControl(
+    WDFQUEUE Queue,
+    WDFREQUEST Request,
+    size_t OutputBufferLength,
+    size_t InputBufferLength,
+    ULONG IoControlCode
+)
+{
+    UNREFERENCED_PARAMETER(Queue);
+    UNREFERENCED_PARAMETER(OutputBufferLength);
+    UNREFERENCED_PARAMETER(InputBufferLength);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_QUEUE,
+        "%!FUNC! Entry (IoControlCode: 0x%X)",
+        IoControlCode);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_QUEUE,
+        "%!FUNC! Exit");
+
+    WdfRequestComplete(Request, STATUS_UNSUCCESSFUL);
 }

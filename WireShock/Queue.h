@@ -38,5 +38,6 @@ WireShockQueueInitialize(
 //
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL WireShockEvtIoDeviceControl;
 EVT_WDF_IO_QUEUE_IO_STOP WireShockEvtIoStop;
+EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL WireShockEvtWdfIoQueueIoInternalDeviceControl;
 
 EXTERN_C_END

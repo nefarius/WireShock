@@ -242,9 +242,11 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
 
-    NTSTATUS            status = STATUS_SUCCESS;
-    size_t              bytesToCopy = 0;
-    WDFMEMORY           memory;
+    NTSTATUS                        status = STATUS_SUCCESS;
+    size_t                          bytesToCopy = 0;
+    WDFMEMORY                       memory;
+    WDF_REQUEST_FORWARD_OPTIONS     forwardOptions;
+    WDFDEVICE                       device, parentDevice;
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry (IoControlCode: 0x%X)", IoControlCode);
 
@@ -586,6 +588,26 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
 
         status = STATUS_UNSUCCESSFUL;
 
+        device = WdfIoQueueGetDevice(WdfRequestGetIoQueue(Request));
+        parentDevice = WdfPdoGetParent(device);
+
+        WDF_REQUEST_FORWARD_OPTIONS_INIT(&forwardOptions);
+
+        status = WdfRequestForwardToParentDeviceIoQueue(
+            Request,
+            WdfDeviceGetDefaultQueue(parentDevice),
+            &forwardOptions
+        );
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_WIREBUS,
+                "WdfRequestForwardToParentDeviceIoQueue failed  with status %!STATUS!",
+                status);
+            break;
+        }
+
+        status = STATUS_PENDING;
+
         break;
     default:
         TraceEvents(TRACE_LEVEL_WARNING,
@@ -595,7 +617,9 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
         break;
     }
 
-    WdfRequestComplete(Request, status);
+    if (status != STATUS_PENDING) {
+        WdfRequestComplete(Request, status);
+    }
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");
 }
