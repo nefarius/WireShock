@@ -572,7 +572,7 @@ WireShockEvtUsbInterruptPipeReadComplete(
             WdfFdoGetDefaultChildList(Device),
             &childDesc.Header,
             &childAddrDesc.Header);
-        if (!NT_SUCCESS(status)) {
+        if (!NT_SUCCESS(status) && status != STATUS_NO_SUCH_DEVICE) {
             TraceEvents(TRACE_LEVEL_WARNING,
                 TRACE_INTERRUPT,
                 "WdfChildListRetrieveAddressDescription failed with status %!STATUS!",

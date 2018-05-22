@@ -671,27 +671,12 @@ BOOLEAN WireBusGetPdoAddressDescriptionByHandle(
             break;
         }
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_WIREBUS,
-            "WdfChildListRetrieveNextDevice SUCCEEDED");
-
         //
         // Fetch address description of child device
         // 
         if (!WireBusGetPdoAddressDescription(Device, &desc.ClientAddress, AddressDescription)) {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_WIREBUS,
-                "WireBusGetPdoAddressDescription failed");
             break;
         }
-
-        TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_WIREBUS,
-            "-- LSB/MSB: %02X %02X vs %02X %02X",
-            AddressDescription->ChildDevice.HCI_ConnectionHandle.Lsb, 
-            AddressDescription->ChildDevice.HCI_ConnectionHandle.Msb,
-            Handle->Lsb,
-            Handle->Msb);
 
         //
         // Compare handle value and break on successful match
