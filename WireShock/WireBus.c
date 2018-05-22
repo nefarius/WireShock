@@ -582,7 +582,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");
 }
 
-BOOLEAN FORCEINLINE WIREBUS_GET_PDO_ADDRESS_DESCRIPTION(
+BOOLEAN WireBusGetPdoAddressDescription(
     WDFDEVICE Device,
     PBD_ADDR Address,
     PPDO_ADDRESS_DESCRIPTION AddressDescription
@@ -618,7 +618,7 @@ BOOLEAN FORCEINLINE WIREBUS_GET_PDO_ADDRESS_DESCRIPTION(
     return TRUE;
 }
 
-BOOLEAN WIREBUS_GET_PDO_ADDRESS_DESCRIPTION_BY_HANDLE(
+BOOLEAN WireBusGetPdoAddressDescriptionByHandle(
     WDFDEVICE Device,
     PBTH_HANDLE Handle,
     PPDO_ADDRESS_DESCRIPTION AddressDescription,
@@ -671,12 +671,27 @@ BOOLEAN WIREBUS_GET_PDO_ADDRESS_DESCRIPTION_BY_HANDLE(
             break;
         }
 
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_WIREBUS,
+            "WdfChildListRetrieveNextDevice SUCCEEDED");
+
         //
         // Fetch address description of child device
         // 
-        if (!WIREBUS_GET_PDO_ADDRESS_DESCRIPTION(Device, &desc.ClientAddress, AddressDescription)) {
+        if (!WireBusGetPdoAddressDescription(Device, &desc.ClientAddress, AddressDescription)) {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_WIREBUS,
+                "WireBusGetPdoAddressDescription failed");
             break;
         }
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_WIREBUS,
+            "-- LSB/MSB: %02X %02X vs %02X %02X",
+            AddressDescription->ChildDevice.HCI_ConnectionHandle.Lsb, 
+            AddressDescription->ChildDevice.HCI_ConnectionHandle.Msb,
+            Handle->Lsb,
+            Handle->Msb);
 
         //
         // Compare handle value and break on successful match
@@ -700,7 +715,7 @@ BOOLEAN WIREBUS_GET_PDO_ADDRESS_DESCRIPTION_BY_HANDLE(
     return retval;
 }
 
-BOOLEAN FORCEINLINE WIREBUS_SET_PDO_ADDRESS_DESCRIPTION(
+BOOLEAN WireBusSetPdoAddressDescription(
     WDFDEVICE Device,
     PBD_ADDR Address,
     PPDO_ADDRESS_DESCRIPTION AddressDescription
@@ -712,10 +727,6 @@ BOOLEAN FORCEINLINE WIREBUS_SET_PDO_ADDRESS_DESCRIPTION(
     WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER_INIT(
         &childIdDesc.Header,
         sizeof(PDO_IDENTIFICATION_DESCRIPTION)
-    );
-    WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(
-        &AddressDescription->Header,
-        sizeof(PDO_ADDRESS_DESCRIPTION)
     );
 
     childIdDesc.ClientAddress = *Address;
@@ -745,11 +756,11 @@ VOID WireBusSetChildHandle(WDFDEVICE Device, PBD_ADDR Address, PBTH_HANDLE Handl
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
 
-    if (WIREBUS_GET_PDO_ADDRESS_DESCRIPTION(Device, Address, &childAddrDesc))
+    if (WireBusGetPdoAddressDescription(Device, Address, &childAddrDesc))
     {
         childAddrDesc.ChildDevice.HCI_ConnectionHandle = *Handle;
 
-        WIREBUS_SET_PDO_ADDRESS_DESCRIPTION(Device, Address, &childAddrDesc);
+        WireBusSetPdoAddressDescription(Device, Address, &childAddrDesc);
     }
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");
@@ -761,11 +772,11 @@ VOID WireBusSetChildDeviceType(WDFDEVICE Device, PBD_ADDR Address, BTH_DEVICE_TY
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
 
-    if (WIREBUS_GET_PDO_ADDRESS_DESCRIPTION(Device, Address, &childAddrDesc))
+    if (WireBusGetPdoAddressDescription(Device, Address, &childAddrDesc))
     {
         childAddrDesc.ChildDevice.DeviceType = DeviceType;
 
-        WIREBUS_SET_PDO_ADDRESS_DESCRIPTION(Device, Address, &childAddrDesc);
+        WireBusSetPdoAddressDescription(Device, Address, &childAddrDesc);
     }
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");
@@ -777,7 +788,7 @@ VOID WireBusSetChildRemoteName(WDFDEVICE Device, PBD_ADDR Address, PUCHAR Buffer
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
 
-    if (WIREBUS_GET_PDO_ADDRESS_DESCRIPTION(Device, Address, &childAddrDesc))
+    if (WireBusGetPdoAddressDescription(Device, Address, &childAddrDesc))
     {
         if (childAddrDesc.ChildDevice.RemoteName != NULL) {
             ExFreePoolWithTag(childAddrDesc.ChildDevice.RemoteName, WIRESHOCK_POOL_TAG);
@@ -794,7 +805,7 @@ VOID WireBusSetChildRemoteName(WDFDEVICE Device, PBD_ADDR Address, PUCHAR Buffer
             "Set device name to: %s",
             childAddrDesc.ChildDevice.RemoteName);
 
-        WIREBUS_SET_PDO_ADDRESS_DESCRIPTION(Device, Address, &childAddrDesc);
+        WireBusSetPdoAddressDescription(Device, Address, &childAddrDesc);
     }
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");

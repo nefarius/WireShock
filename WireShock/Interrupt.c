@@ -630,7 +630,10 @@ WireShockEvtUsbInterruptPipeReadComplete(
             clientHandle.Lsb = buffer[3];
             clientHandle.Msb = buffer[4] | 0x20;
 
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LSB/MSB: %02X %02X", clientHandle.Lsb, clientHandle.Msb);
+            TraceEvents(TRACE_LEVEL_INFORMATION, 
+                TRACE_INTERRUPT, 
+                "!! LSB/MSB: %02X %02X", 
+                clientHandle.Lsb, clientHandle.Msb);
 
             BD_ADDR_FROM_BUFFER(clientAddr, &buffer[5]);
 
@@ -656,40 +659,35 @@ WireShockEvtUsbInterruptPipeReadComplete(
         if (buffer[2] == 0x00)
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Disconnection_Complete_EV SUCCESS");
-
+            
             clientHandle.Lsb = buffer[3];
             clientHandle.Msb = buffer[4] | 0x20;
 
-            // TODO: implement graceful child disconnect event
-            /*
-            pClientDevice = BTH_DEVICE_LIST_GET_BY_HANDLE(&pDeviceContext->ClientDeviceList, &clientHandle);
+            TraceEvents(TRACE_LEVEL_INFORMATION, 
+                TRACE_INTERRUPT, 
+                "!! LSB/MSB: %02X %02X", 
+                clientHandle.Lsb, clientHandle.Msb);
 
-            if (BTH_DEVICE_LIST_REMOVE(&pDeviceContext->ClientDeviceList, &clientHandle))
+            PDO_IDENTIFICATION_DESCRIPTION desc;
+            PDO_ADDRESS_DESCRIPTION addrDesc;
+
+            if (WireBusGetPdoAddressDescriptionByHandle(Device, &clientHandle, &addrDesc, &clientAddr))
             {
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
-                    "Removed device with handle %04X", *(PUSHORT)&clientHandle);
+                WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER_INIT(&desc.Header, sizeof(desc));
+                desc.ClientAddress = clientAddr;
 
-                status = WdfIoQueueRetrieveNextRequest(
-                    pDeviceContext->ChildDeviceRemovalQueue,
-                    &removalRequest);
-
-                if (NT_SUCCESS(status))
+                status = WdfChildListUpdateChildDescriptionAsMissing(
+                    WdfFdoGetDefaultChildList(Device),
+                    &desc.Header
+                );
+                if (!NT_SUCCESS(status))
                 {
-                    status = WdfRequestRetrieveOutputBuffer(
-                        removalRequest,
-                        sizeof(AIRBENDER_GET_CLIENT_REMOVAL),
-                        &pRemoval,
-                        &buflen);
-
-                    if (NT_SUCCESS(status))
-                    {
-                        pRemoval->ClientAddress = pClientDevice->ClientAddress;
-                    }
-
-                    WdfRequestCompleteWithInformation(removalRequest, status, buflen);
+                    TraceEvents(TRACE_LEVEL_ERROR,
+                        TRACE_INTERRUPT,
+                        "WdfChildListUpdateChildDescriptionAsMissing failed with status %!STATUS!",
+                        status);
                 }
             }
-            */
         }
 
         break;
