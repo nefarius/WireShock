@@ -618,6 +618,88 @@ BOOLEAN FORCEINLINE WIREBUS_GET_PDO_ADDRESS_DESCRIPTION(
     return TRUE;
 }
 
+BOOLEAN WIREBUS_GET_PDO_ADDRESS_DESCRIPTION_BY_HANDLE(
+    WDFDEVICE Device,
+    PBTH_HANDLE Handle,
+    PPDO_ADDRESS_DESCRIPTION AddressDescription,
+    PBD_ADDR Address
+)
+{
+    NTSTATUS                        status;
+    WDFCHILDLIST                    list;
+    WDF_CHILD_LIST_ITERATOR         iter;
+    WDF_CHILD_RETRIEVE_INFO         info;
+    PDO_IDENTIFICATION_DESCRIPTION  desc;
+    WDFDEVICE                       child;
+    BOOLEAN                         retval = FALSE;
+
+
+    list = WdfFdoGetDefaultChildList(Device);
+
+    WDF_CHILD_LIST_ITERATOR_INIT(&iter, WdfRetrievePresentChildren);
+
+    WdfChildListBeginIteration(list, &iter);
+
+    //
+    // Enumerate through child list
+    // 
+    for (;;)
+    {
+        WDF_CHILD_RETRIEVE_INFO_INIT(&info, &desc.Header);
+        WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER_INIT(
+            &desc.Header,
+            sizeof(desc)
+        );
+
+        //
+        // Fetch next child device
+        // 
+        status = WdfChildListRetrieveNextDevice(
+            list,
+            &iter,
+            &child,
+            &info
+        );
+        if (!NT_SUCCESS(status)
+            || status == STATUS_NO_MORE_ENTRIES
+            || info.Status != WdfChildListRetrieveDeviceSuccess)
+        {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_WIREBUS,
+                "WdfChildListRetrieveNextDevice returned with status %!STATUS!",
+                status);
+            break;
+        }
+
+        //
+        // Fetch address description of child device
+        // 
+        if (!WIREBUS_GET_PDO_ADDRESS_DESCRIPTION(Device, &desc.ClientAddress, AddressDescription)) {
+            break;
+        }
+
+        //
+        // Compare handle value and break on successful match
+        // 
+        if (RtlCompareMemory(
+            &AddressDescription->ChildDevice.HCI_ConnectionHandle,
+            Handle,
+            sizeof(BTH_HANDLE)
+        ) == sizeof(BTH_HANDLE))
+        {
+            if (Address != NULL) {
+                *Address = desc.ClientAddress;
+            }
+            retval = TRUE;
+            break;
+        }
+    }
+
+    WdfChildListEndIteration(list, &iter);
+
+    return retval;
+}
+
 BOOLEAN FORCEINLINE WIREBUS_SET_PDO_ADDRESS_DESCRIPTION(
     WDFDEVICE Device,
     PBD_ADDR Address,
@@ -707,8 +789,8 @@ VOID WireBusSetChildRemoteName(WDFDEVICE Device, PBD_ADDR Address, PUCHAR Buffer
         );
         RtlCopyMemory(childAddrDesc.ChildDevice.RemoteName, Buffer, BufferLength);
 
-        TraceEvents(TRACE_LEVEL_INFORMATION, 
-            TRACE_WIREBUS, 
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_WIREBUS,
             "Set device name to: %s",
             childAddrDesc.ChildDevice.RemoteName);
 
