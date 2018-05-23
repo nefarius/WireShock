@@ -565,7 +565,8 @@ Ds3ProcessHidInputReport(
 
     NTSTATUS    status = STATUS_INVALID_PARAMETER;
     WDFREQUEST  Request;
-    PUCHAR      buffer;
+    PUCHAR      outputBuffer;
+    PUCHAR      inputBuffer;
     size_t      bufferLength;
 
     status = WdfIoQueueRetrieveNextRequest(Device->HidInputReportQueue, &Request);
@@ -575,7 +576,7 @@ Ds3ProcessHidInputReport(
         status = WdfRequestRetrieveOutputBuffer(
             Request,
             DS3_HID_INPUT_REPORT_SIZE,
-            (PVOID)&buffer,
+            (PVOID)&outputBuffer,
             &bufferLength);
 
         if (!NT_SUCCESS(status))
@@ -587,13 +588,88 @@ Ds3ProcessHidInputReport(
             return status;
         }
 
-        RtlCopyMemory(buffer,
-            &Buffer[9],
-            DS3_HID_INPUT_REPORT_SIZE);
+        // Shift to begin of report
+        inputBuffer = &Buffer[9];
+
+        // Report ID
+        outputBuffer[0] = inputBuffer[0];
+
+        // Prepare D-Pad
+        outputBuffer[5] &= ~0xF; // Clear lower 4 bits
+
+        // Translate D-Pad to HAT format
+        switch (inputBuffer[2] & ~0xF)
+        {
+        case 0x10: // N
+            outputBuffer[5] |= 0 & 0xF;
+            break;
+        case 0x30: // NE
+            outputBuffer[5] |= 1 & 0xF;
+            break;
+        case 0x20: // E
+            outputBuffer[5] |= 2 & 0xF;
+            break;
+        case 0x60: // SE
+            outputBuffer[5] |= 3 & 0xF;
+            break;
+        case 0x40: // S
+            outputBuffer[5] |= 4 & 0xF;
+            break;
+        case 0xC0: // SW
+            outputBuffer[5] |= 5 & 0xF;
+            break;
+        case 0x80: // W
+            outputBuffer[5] |= 6 & 0xF;
+            break;
+        case 0x90: // NW
+            outputBuffer[5] |= 7 & 0xF;
+            break;
+        default: // Released
+            outputBuffer[5] |= 8 & 0xF;
+            break;
+        }
+
+        // Prepare face buttons
+        outputBuffer[5] &= ~0xF0; // Clear upper 4 bits
+        // Set face buttons
+        outputBuffer[5] |= inputBuffer[3] & 0xF0;
+
+        // Thumb axes
+        outputBuffer[1] = inputBuffer[6]; // LTX
+        outputBuffer[2] = inputBuffer[7]; // LTY
+        outputBuffer[3] = inputBuffer[8]; // RTX
+        outputBuffer[4] = inputBuffer[9]; // RTY
+
+        // Remaining buttons
+        outputBuffer[6] &= ~0xFF; // Clear all 8 bits
+        outputBuffer[6] |= (inputBuffer[2] & 0xF);
+        outputBuffer[6] |= (inputBuffer[3] & 0xF) << 4;
+
+        // Trigger axes
+        outputBuffer[8] = inputBuffer[18];
+        outputBuffer[9] = inputBuffer[19];
+
+        // PS button
+        outputBuffer[7] = inputBuffer[4];
+
+        // D-Pad (pressure)
+        outputBuffer[10] = inputBuffer[14];
+        outputBuffer[11] = inputBuffer[15];
+        outputBuffer[12] = inputBuffer[16];
+        outputBuffer[13] = inputBuffer[17];
+
+        // Shoulders (pressure)
+        outputBuffer[14] = inputBuffer[20];
+        outputBuffer[15] = inputBuffer[21];
+
+        // Face buttons (pressure)
+        outputBuffer[16] = inputBuffer[22];
+        outputBuffer[17] = inputBuffer[23];
+        outputBuffer[18] = inputBuffer[24];
+        outputBuffer[19] = inputBuffer[25];
 
         WdfRequestCompleteWithInformation(Request, status, bufferLength);
     }
-
 
     return status;
 }
