@@ -56,6 +56,7 @@
     <ClInclude Include="HCI.h" />
     <ClInclude Include="Interrupt.h" />
     <ClInclude Include="L2CAP.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="WireBus.h" />
     <ClInclude Include="WireShock.h" />
     <ClInclude Include="Public.h" />
@@ -297,6 +298,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <FilesToPackage Include="$(TargetPath)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="WireShock.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
