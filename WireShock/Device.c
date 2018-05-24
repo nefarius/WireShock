@@ -20,6 +20,8 @@ Environment:
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (PAGE, WireShockCreateDevice)
 #pragma alloc_text (PAGE, WireShockEvtDevicePrepareHardware)
+#pragma alloc_text (PAGE, WireShockEvtDeviceD0Entry)
+#pragma alloc_text (PAGE, InitHidInitReports)
 #endif
 
 
@@ -297,6 +299,9 @@ WireShockEvtDeviceD0Entry(
     NTSTATUS                status;
     BOOLEAN                 isTargetStarted;
 
+    PAGED_CODE();
+
+
     pDeviceContext = DeviceGetContext(Device);
     isTargetStarted = FALSE;
 
@@ -351,6 +356,8 @@ End:
 
 VOID InitHidInitReports(IN PDEVICE_CONTEXT Context)
 {
+    PAGED_CODE();
+
     InitByteArray(&Context->HidInitReports);
 
     APPEND_BYTE_ARRAY(Context->HidInitReports, P99_PROTECT({
