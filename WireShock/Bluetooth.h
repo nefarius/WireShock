@@ -138,29 +138,6 @@ typedef struct _BTH_DEVICE
 */
 #define BTH_HANDLE_FROM_BUFFER(_ch_, _buf_)     (RtlCopyMemory(&_ch_, _buf_, sizeof(BTH_HANDLE)));
 
-/**
-* \fn  VOID FORCEINLINE BTH_DEVICE_FREE( PBTH_DEVICE Device )
-*
-* \brief   Frees resources allocated by provided BTH_DEVICE.
-*
-* \author  Benjamin "Nefarius" Höglinger
-* \date    20.09.2017
-*
-* \param   Device  The BTH_DEVICE handle.
-*
-* \return  Nothing.
-*/
-VOID FORCEINLINE BTH_DEVICE_FREE(
-    PBTH_DEVICE Device
-)
-{
-    if (Device->RemoteName)
-        ExFreePoolWithTag(Device->RemoteName, WIRESHOCK_POOL_TAG);
-
-    WdfIoQueuePurgeSynchronously(Device->HidInputReportQueue);
-    WdfObjectDelete(Device->HidInputReportQueue);
-}
-
 typedef struct _PDO_IDENTIFICATION_DESCRIPTION 
 {
     WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER Header;
