@@ -138,6 +138,14 @@ typedef struct _BTH_DEVICE
 */
 #define BTH_HANDLE_FROM_BUFFER(_ch_, _buf_)     (RtlCopyMemory(&_ch_, _buf_, sizeof(BTH_HANDLE)));
 
+/**
+ * \struct  _PDO_IDENTIFICATION_DESCRIPTION
+ *
+ * \brief   Identification description of the PDO on the bus.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    24.05.2018
+ */
 typedef struct _PDO_IDENTIFICATION_DESCRIPTION 
 {
     WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER Header;
@@ -149,6 +157,15 @@ typedef struct _PDO_IDENTIFICATION_DESCRIPTION
 
 } PDO_IDENTIFICATION_DESCRIPTION, *PPDO_IDENTIFICATION_DESCRIPTION;
 
+/**
+ * \struct  _PDO_ADDRESS_DESCRIPTION
+ *
+ * \brief   Address description holding all the shared state information between the FDO and the
+ *          PDO.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    24.05.2018
+ */
 typedef struct _PDO_ADDRESS_DESCRIPTION
 {
     WDF_CHILD_ADDRESS_DESCRIPTION_HEADER  Header;
@@ -160,44 +177,87 @@ typedef struct _PDO_ADDRESS_DESCRIPTION
 
 } PDO_ADDRESS_DESCRIPTION, *PPDO_ADDRESS_DESCRIPTION;
 
+/**
+ * \fn  BOOLEAN WireBusGetPdoAddressDescription( _In_ WDFDEVICE Device, _In_ PBD_ADDR Address, _Out_ PPDO_ADDRESS_DESCRIPTION AddressDescription );
+ *
+ * \brief   Retrieves address description of the PDO identified by supplied BD_ADDR.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    24.05.2018
+ *
+ * \param   Device              The framework device handle.
+ * \param   Address             The MAC address of the PDO.
+ * \param   AddressDescription  Pointer to struct _PDO_ADDRESS_DESCRIPTION.
+ *
+ * \return  True if it succeeds, false if it fails.
+ */
 BOOLEAN WireBusGetPdoAddressDescription(
-    WDFDEVICE Device,
-    PBD_ADDR Address,
-    PPDO_ADDRESS_DESCRIPTION AddressDescription
+    _In_ WDFDEVICE Device,
+    _In_ PBD_ADDR Address,
+    _Out_ PPDO_ADDRESS_DESCRIPTION AddressDescription
 );
 
+/**
+ * \fn  BOOLEAN WireBusGetPdoAddressDescriptionByHandle( _In_ WDFDEVICE Device, _In_ PBTH_HANDLE Handle, _Out_ PPDO_ADDRESS_DESCRIPTION AddressDescription, _Out_opt_ PBD_ADDR Address );
+ *
+ * \brief   Retrieves address description of the PDO identified by supplied BTH_HANDLE.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    24.05.2018
+ *
+ * \param   Device              The framework device handle.
+ * \param   Handle              The handle of the PDO.
+ * \param   AddressDescription  Information describing the address.
+ * \param   Address             Pointer to struct _PDO_ADDRESS_DESCRIPTION.
+ *
+ * \return  True if it succeeds, false if it fails.
+ */
 BOOLEAN WireBusGetPdoAddressDescriptionByHandle(
-    WDFDEVICE Device,
-    PBTH_HANDLE Handle,
-    PPDO_ADDRESS_DESCRIPTION AddressDescription,
-    PBD_ADDR Address
+    _In_ WDFDEVICE Device,
+    _In_ PBTH_HANDLE Handle,
+    _Out_ PPDO_ADDRESS_DESCRIPTION AddressDescription,
+    _Out_opt_ PBD_ADDR Address
 );
 
+/**
+ * \fn  BOOLEAN WireBusSetPdoAddressDescription( _In_ WDFDEVICE Device, _In_ PBD_ADDR Address, _Inout_ PPDO_ADDRESS_DESCRIPTION AddressDescription );
+ *
+ * \brief   Updates address description of the PDO identified by supplied BD_ADDR.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    24.05.2018
+ *
+ * \param   Device              The framework device handle.
+ * \param   Address             The MAC address of the PDO.
+ * \param   AddressDescription  Pointer to struct _PDO_ADDRESS_DESCRIPTION.
+ *
+ * \return  True if it succeeds, false if it fails.
+ */
 BOOLEAN WireBusSetPdoAddressDescription(
-    WDFDEVICE Device,
-    PBD_ADDR Address,
-    PPDO_ADDRESS_DESCRIPTION AddressDescription
+    _In_ WDFDEVICE Device,
+    _In_ PBD_ADDR Address,
+    _Inout_ PPDO_ADDRESS_DESCRIPTION AddressDescription
 );
 
 
 VOID
 WireBusSetChildHandle(
-    WDFDEVICE Device,
-    PBD_ADDR Address,
-    PBTH_HANDLE Handle
+    _In_ WDFDEVICE Device,
+    _In_ PBD_ADDR Address,
+    _In_ PBTH_HANDLE Handle
 );
 
 VOID
 WireBusSetChildDeviceType(
-    WDFDEVICE Device,
-    PBD_ADDR Address,
-    BTH_DEVICE_TYPE DeviceType
+    _In_ WDFDEVICE Device,
+    _In_ PBD_ADDR Address,
+    _In_ BTH_DEVICE_TYPE DeviceType
 );
 
 VOID
 WireBusSetChildRemoteName(
-    WDFDEVICE Device,
-    PBD_ADDR Address,
-    PUCHAR Buffer,
-    ULONG BufferLength
+    _In_ WDFDEVICE Device,
+    _In_ PBD_ADDR Address,
+    _In_ PUCHAR Buffer,
+    _In_ ULONG BufferLength
 );
