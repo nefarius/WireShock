@@ -29,6 +29,9 @@ SOFTWARE.
 
 #define BD_LINK_LENGTH  0x10
 
+//
+// Encryption key shared between host and controllers
+// 
 static const BYTE BD_LINK[BD_LINK_LENGTH] =
 {
     0x56, 0xE8, 0x81, 0x38, 0x08, 0x06, 0x51, 0x41,
@@ -123,6 +126,17 @@ typedef struct _BTH_DEVICE
 
 } BTH_DEVICE, *PBTH_DEVICE;
 
+/**
+ * \def BD_ADDR_FROM_BUFFER(_addr_, _buf_);
+ *
+ * \brief   A macro that extracts a BD_ADDR from a bulk input pipe buffer.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    24.05.2018
+ *
+ * \param   _addr_  The address of the device.
+ * \param   _buf_   The buffer.
+ */
 #define BD_ADDR_FROM_BUFFER(_addr_, _buf_)      (RtlCopyMemory(&_addr_, _buf_, sizeof(BD_ADDR)));
 
 /**
@@ -176,6 +190,8 @@ typedef struct _PDO_ADDRESS_DESCRIPTION
     BTH_DEVICE ChildDevice;
 
 } PDO_ADDRESS_DESCRIPTION, *PPDO_ADDRESS_DESCRIPTION;
+
+
 
 /**
  * \fn  BOOLEAN WireBusGetPdoAddressDescription( _In_ WDFDEVICE Device, _In_ PBD_ADDR Address, _Out_ PPDO_ADDRESS_DESCRIPTION AddressDescription );
