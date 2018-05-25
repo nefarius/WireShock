@@ -336,6 +336,12 @@ WireShockEvtUsbBulkReadPipeReadComplete(
 
             break;
         default:
+
+            TraceEvents(TRACE_LEVEL_WARNING, 
+                TRACE_BULKRWR, 
+                "Unknown BTH_DEVICE_TYPE: 0x%02X", 
+                pClientDevice->DeviceType);
+
             break;
         }
     }
