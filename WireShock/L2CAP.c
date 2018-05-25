@@ -37,10 +37,10 @@ L2CAP_Command(
 
     buffer[0] = Handle.Lsb;
     buffer[1] = Handle.Msb | 0x20;
-    buffer[2] = (BYTE)BufferLength + 4;
-    buffer[3] = 0x00;
-    buffer[4] = (BYTE)BufferLength;
-    buffer[5] = 0x00;
+    buffer[2] = (BYTE)((BufferLength + 4) & 0xFF);
+    buffer[3] = (BYTE)((BufferLength + 4) >> 8);
+    buffer[4] = (BYTE)(BufferLength & 0xFF);
+    buffer[5] = (BYTE)(BufferLength >> 8);
     buffer[6] = 0x01;
     buffer[7] = 0x00;
 
