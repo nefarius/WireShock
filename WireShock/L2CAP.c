@@ -121,8 +121,8 @@ L2CAP_Command_Configuration_Request(
     {
         buffer[8] = 0x01;
         buffer[9] = 0x02;
-        buffer[10] = 0x96;
-        buffer[11] = 0x00;
+        buffer[10] = 0xFF;
+        buffer[11] = 0xFF;
     }
 
     return L2CAP_Command(Context, Handle, buffer, SetMtu ? 12 : 8);
@@ -135,7 +135,7 @@ L2CAP_Command_Configuration_Response(
     BYTE Id,
     L2CAP_CID SourceChannelId)
 {
-    BYTE buffer[10];
+    BYTE buffer[14];
 
     buffer[0] = L2CAP_Configuration_Response;
     buffer[1] = Id;
@@ -147,6 +147,10 @@ L2CAP_Command_Configuration_Response(
     buffer[7] = 0x00;
     buffer[8] = 0x00;
     buffer[9] = 0x00;
+    buffer[10] = 0x01; // Config
+    buffer[11] = 0x02;
+    buffer[12] = 0xA0;
+    buffer[13] = 0x02;
 
     return L2CAP_Command(Context, Handle, buffer, 10);
 }
