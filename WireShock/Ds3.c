@@ -63,8 +63,8 @@ Ds3ConnectionRequest(
         data->Identifier,
         scid,
         dcid,
-        L2CAP_ConnectionResponseResult_ConnectionPending,
-        L2CAP_ConnectionResponseStatus_AuthorisationPending);
+        L2CAP_ConnectionResponseResult_ConnectionPending
+    );
 
     if (!NT_SUCCESS(status))
     {
@@ -82,8 +82,8 @@ Ds3ConnectionRequest(
         data->Identifier,
         scid,
         dcid,
-        L2CAP_ConnectionResponseResult_ConnectionSuccessful,
-        L2CAP_ConnectionResponseStatus_NoFurtherInformationAvailable);
+        L2CAP_ConnectionResponseResult_ConnectionSuccessful
+    );
 
     if (!NT_SUCCESS(status))
     {

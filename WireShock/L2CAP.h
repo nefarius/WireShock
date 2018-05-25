@@ -577,8 +577,7 @@ L2CAP_Command_Connection_Response(
     BYTE Id,
     L2CAP_CID DestinationChannelId,
     L2CAP_CID SourceChannelId,
-    L2CAP_CONNECTION_RESPONSE_RESULT Result,
-    L2CAP_CONNECTION_RESPONSE_STATUS Status);
+    L2CAP_CONNECTION_RESPONSE_RESULT Result);
 
 NTSTATUS
 L2CAP_Command_Configuration_Request(
