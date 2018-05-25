@@ -63,6 +63,25 @@ Ds3ConnectionRequest(
         data->Identifier,
         scid,
         dcid,
+        L2CAP_ConnectionResponseResult_ConnectionPending,
+        L2CAP_ConnectionResponseStatus_AuthorisationPending);
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "L2CAP_Command_Connection_Response (PENDING) failed");
+        return status;
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
+        "<< L2CAP_Connection_Response SCID: %04X DCID: %04X",
+        *(PUSHORT)&scid, *(PUSHORT)&dcid);
+
+    status = L2CAP_Command_Connection_Response(
+        Context,
+        Device->HCI_ConnectionHandle,
+        data->Identifier,
+        scid,
+        dcid,
         L2CAP_ConnectionResponseResult_ConnectionSuccessful,
         L2CAP_ConnectionResponseStatus_NoFurtherInformationAvailable);
 
