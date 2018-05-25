@@ -63,8 +63,8 @@ L2CAP_Command_Connection_Request(
     buffer[1] = Id;
     buffer[2] = 0x04;
     buffer[3] = 0x00;
-    buffer[4] = (BYTE)ProtocolServiceMultiplexer;
-    buffer[5] = 0x00;
+    buffer[4] = (BYTE)(ProtocolServiceMultiplexer & 0xFF);
+    buffer[5] = (BYTE)(ProtocolServiceMultiplexer >> 8);
     buffer[6] = DestinationChannelId.Lsb;
     buffer[7] = DestinationChannelId.Msb;
 
