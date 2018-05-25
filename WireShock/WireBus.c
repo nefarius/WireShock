@@ -361,20 +361,16 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
         0x75, 0x08,        //     Report Size (8)
         0x95, 0x02,        //     Report Count (2)
         0x81, 0x02,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
-        0xC0,              //   End Collection
-        0xA1, 0x01,        //   Collection (Application)
-        0x85, 0x01,        //     Report ID (1)
-        0x06, 0x00, 0xFF,  //     Usage Page (Vendor Defined 0xFF00)
-        0x09, 0x01,        //     Usage (0x01)
-        0x09, 0x02,        //     Usage (0x02)
-        0x09, 0x03,        //     Usage (0x03)
-        0x09, 0x04,        //     Usage (0x04)
-        0x09, 0x05,        //     Usage (0x05)
-        0x09, 0x06,        //     Usage (0x06)
-        0x09, 0x07,        //     Usage (0x07)
-        0x09, 0x08,        //     Usage (0x08)
-        0x09, 0x09,        //     Usage (0x09)
-        0x09, 0x0A,        //     Usage (0x0A)
+        0x09, 0x36,        //     Usage (Slider)
+        0x09, 0x36,        //     Usage (Slider)
+        0x09, 0x36,        //     Usage (Slider)
+        0x09, 0x36,        //     Usage (Slider)
+        0x09, 0x36,        //     Usage (Slider)
+        0x09, 0x36,        //     Usage (Slider)
+        0x09, 0x36,        //     Usage (Slider)
+        0x09, 0x36,        //     Usage (Slider)
+        0x09, 0x36,        //     Usage (Slider)
+        0x09, 0x36,        //     Usage (Slider)
         0x75, 0x08,        //     Report Size (8)
         0x95, 0x0A,        //     Report Count (10)
         0x15, 0x00,        //     Logical Minimum (0)
@@ -393,7 +389,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
         0xC0,              //   End Collection
         0xC0,              // End Collection
 
-                           // 160 bytes
+        // 152 bytes
     };
     
     CONST HID_DESCRIPTOR Ds3HidDescriptor = {
