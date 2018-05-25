@@ -59,7 +59,7 @@ L2CAP_Command_Connection_Request(
 {
     BYTE buffer[8];
 
-    buffer[0] = 0x02;
+    buffer[0] = L2CAP_Connection_Request;
     buffer[1] = Id;
     buffer[2] = 0x04;
     buffer[3] = 0x00;
@@ -83,7 +83,7 @@ L2CAP_Command_Connection_Response(
 {
     BYTE buffer[12];
 
-    buffer[0] = 0x03;
+    buffer[0] = L2CAP_Connection_Response;
     buffer[1] = Id;
     buffer[2] = 0x08;
     buffer[3] = 0x00;
@@ -118,7 +118,7 @@ L2CAP_Command_Configuration_Request(
 {
     BYTE buffer[12];
 
-    buffer[0] = 0x04;
+    buffer[0] = L2CAP_Configuration_Request;
     buffer[1] = Id;
     buffer[2] = (BYTE)(SetMtu ? 0x08 : 0x04);
     buffer[3] = 0x00;
@@ -147,7 +147,7 @@ L2CAP_Command_Configuration_Response(
 {
     BYTE buffer[10];
 
-    buffer[0] = 0x05;
+    buffer[0] = L2CAP_Configuration_Response;
     buffer[1] = Id;
     buffer[2] = 0x06;
     buffer[3] = 0x00;
@@ -171,7 +171,7 @@ L2CAP_Command_Disconnection_Request(
 {
     BYTE buffer[8];
 
-    buffer[0] = 0x06;
+    buffer[0] = L2CAP_Disconnection_Request;
     buffer[1] = Id;
     buffer[2] = 0x04;
     buffer[3] = 0x00;
@@ -193,7 +193,7 @@ L2CAP_Command_Disconnection_Response(
 {
     BYTE buffer[8];
 
-    buffer[0] = 0x07;
+    buffer[0] = L2CAP_Disconnection_Response;
     buffer[1] = Id;
     buffer[2] = 0x04;
     buffer[3] = 0x00;
