@@ -152,7 +152,7 @@ L2CAP_Command_Configuration_Response(
     buffer[12] = 0xA0;
     buffer[13] = 0x02;
 
-    return L2CAP_Command(Context, Handle, buffer, 10);
+    return L2CAP_Command(Context, Handle, buffer, 14);
 }
 
 NTSTATUS
