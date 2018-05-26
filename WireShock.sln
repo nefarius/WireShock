@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27428.2005
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = ".build", "build\.build.csproj", "{93107B18-F157-4BE7-BED1-F35442332BAF}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WireShock", "WireShock\WireShock.vcxproj", "{4D5E47F6-D7F1-4DFC-947C-DE8A4D8BBFAF}"
 EndProject
 Global
@@ -17,6 +19,22 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Debug|ARM.Build.0 = Debug|Any CPU
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Debug|x64.Build.0 = Debug|Any CPU
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Debug|x86.Build.0 = Debug|Any CPU
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Release|ARM.ActiveCfg = Release|Any CPU
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Release|ARM.Build.0 = Release|Any CPU
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Release|ARM64.Build.0 = Release|Any CPU
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Release|x64.ActiveCfg = Release|Any CPU
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Release|x64.Build.0 = Release|Any CPU
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Release|x86.ActiveCfg = Release|Any CPU
+		{93107B18-F157-4BE7-BED1-F35442332BAF}.Release|x86.Build.0 = Release|Any CPU
 		{4D5E47F6-D7F1-4DFC-947C-DE8A4D8BBFAF}.Debug|ARM.ActiveCfg = Debug|ARM
 		{4D5E47F6-D7F1-4DFC-947C-DE8A4D8BBFAF}.Debug|ARM.Build.0 = Debug|ARM
 		{4D5E47F6-D7F1-4DFC-947C-DE8A4D8BBFAF}.Debug|ARM.Deploy.0 = Debug|ARM

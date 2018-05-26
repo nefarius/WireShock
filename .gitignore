@@ -262,3 +262,4 @@ __pycache__/
 /disk1
 /setup.rpt
 /setup.inf
+*.DotSettings
