@@ -89,6 +89,16 @@ typedef struct _BTH_DEVICE
     // 
     BTH_HANDLE_PAIR L2CAP_ServiceHandle;
 
+    BOOLEAN IsHidCommandEstablished;
+
+    BOOLEAN IsHidCommandConfigured;
+
+    BOOLEAN IsHidInterruptEstablished;
+
+    BOOLEAN IsHidInterruptConfigured;
+
+    BOOLEAN IsHidInterruptEnabled;
+
     //
     // Indicates if the service channel can start
     // 

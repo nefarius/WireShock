@@ -128,6 +128,10 @@ Ds3ConnectionResponse(
 
     PL2CAP_SIGNALLING_CONNECTION_RESPONSE data = (PL2CAP_SIGNALLING_CONNECTION_RESPONSE)&Buffer[8];
 
+    UNREFERENCED_PARAMETER(CID);
+    UNREFERENCED_PARAMETER(Device);
+    UNREFERENCED_PARAMETER(Context);
+
     scid = data->SCID;
     dcid = data->DCID;
 
@@ -139,6 +143,7 @@ Ds3ConnectionResponse(
     {
     case L2CAP_ConnectionResponseResult_ConnectionSuccessful:
 
+        /*
         L2CAP_SET_CONNECTION_TYPE(
             Device,
             L2CAP_PSM_HID_Service,
@@ -170,6 +175,8 @@ Ds3ConnectionResponse(
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
             "<< L2CAP_Configuration_Request SCID: %04X DCID: %04X",
             *(PUSHORT)&scid, *(PUSHORT)&dcid);
+            *
+            */
 
         break;
     case L2CAP_ConnectionResponseResult_ConnectionPending:
@@ -212,6 +219,21 @@ NTSTATUS Ds3ConfigurationRequest(
 
     L2CAP_DEVICE_GET_SCID(Device, dcid, &scid);
 
+
+    L2CAP_CID   dcid_tmp;
+
+    L2CAP_DEVICE_GET_DCID_FOR_TYPE(Device, L2CAP_PSM_HID_Command, &dcid_tmp);
+    if (RtlCompareMemory(&dcid, &dcid_tmp, sizeof(L2CAP_CID)) == sizeof(L2CAP_CID))
+    {
+        Device->IsHidCommandConfigured = TRUE;
+    }
+
+    L2CAP_DEVICE_GET_DCID_FOR_TYPE(Device, L2CAP_PSM_HID_Interrupt, &dcid_tmp);
+    if (RtlCompareMemory(&dcid, &dcid_tmp, sizeof(L2CAP_CID)) == sizeof(L2CAP_CID))
+    {
+        Device->IsHidInterruptConfigured = TRUE;
+    }
+
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
         "! L2CAP_DEVICE_GET_SCID: DCID %04X -> SCID %04X",
         *(PUSHORT)&dcid, *(PUSHORT)&scid);
@@ -236,6 +258,45 @@ NTSTATUS Ds3ConfigurationRequest(
         "<< L2CAP_Configuration_Response SCID: %04X DCID: %04X",
         *(PUSHORT)&scid, *(PUSHORT)&dcid);
 
+    if (Device->IsHidCommandConfigured)
+    {
+        if (Device->InitHidStage < DS3_INIT_HID_STAGE_MAX)
+        {
+            L2CAP_DEVICE_GET_SCID_FOR_TYPE(
+                Device,
+                L2CAP_PSM_HID_Command,
+                &scid);
+
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
+                "!! L2CAP_DEVICE_GET_SCID_FOR_TYPE: L2CAP_PSM_HID_Command -> SCID %04X",
+                *(PUSHORT)&scid);
+
+            GetElementsByteArray(
+                &Context->HidInitReports,
+                Device->InitHidStage++,
+                &pHidCmd,
+                &hidCmdLen);
+
+            status = HID_Command(
+                Context,
+                Device->HCI_ConnectionHandle,
+                scid,
+                pHidCmd,
+                hidCmdLen);
+
+            if (!NT_SUCCESS(status))
+            {
+                TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "HID_Command failed");
+                return status;
+            }
+
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
+                "<< HID_Command Index: %d, Length: %d",
+                Device->InitHidStage - 1, hidCmdLen);
+        }
+    }
+
+    /*
     if (Device->IsServiceStarted)
     {
         Device->CanStartHid = TRUE;
@@ -275,6 +336,7 @@ NTSTATUS Ds3ConfigurationRequest(
                 Device->InitHidStage - 1, hidCmdLen);
         }
     }
+    */
 
     return status;
 }
@@ -292,12 +354,31 @@ Ds3ConfigurationResponse(
 
     PL2CAP_SIGNALLING_CONFIGURATION_RESPONSE data = (PL2CAP_SIGNALLING_CONFIGURATION_RESPONSE)&Buffer[8];
 
+    UNREFERENCED_PARAMETER(CID);
+    UNREFERENCED_PARAMETER(Context);
+    UNREFERENCED_PARAMETER(dcid);
+
     scid = data->SCID;
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
         ">> L2CAP_Configuration_Response SCID: 0x%04X",
         *(PUSHORT)&scid);
 
+    L2CAP_CID   dcid_tmp;
+
+    L2CAP_DEVICE_GET_DCID_FOR_TYPE(Device, L2CAP_PSM_HID_Command, &dcid_tmp);
+    if (RtlCompareMemory(&scid, &dcid_tmp, sizeof(L2CAP_CID)) == sizeof(L2CAP_CID))
+    {
+        Device->IsHidCommandEstablished = TRUE;
+    }
+
+    L2CAP_DEVICE_GET_DCID_FOR_TYPE(Device, L2CAP_PSM_HID_Interrupt, &dcid_tmp);
+    if (RtlCompareMemory(&scid, &dcid_tmp, sizeof(L2CAP_CID)) == sizeof(L2CAP_CID))
+    {
+        Device->IsHidInterruptEstablished = TRUE;
+    }
+
+    /*
     if (Device->CanStartService)
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3, "Requesting service connection");
@@ -321,6 +402,7 @@ Ds3ConfigurationResponse(
             "<< L2CAP_Connection_Request SCID: %04X DCID: %04X",
             *(PUSHORT)&scid, *(PUSHORT)&dcid);
     }
+    */
 
     return status;
 }
@@ -475,12 +557,14 @@ Ds3InitHidReportStage(
     // TODO: remove!
     UNREFERENCED_PARAMETER(buflen);
     UNREFERENCED_PARAMETER(arrivalRequest);
+    UNREFERENCED_PARAMETER(CID);
+    UNREFERENCED_PARAMETER(dcid);
 
     if (Device->InitHidStage < DS3_INIT_HID_STAGE_MAX)
     {
         L2CAP_DEVICE_GET_SCID_FOR_TYPE(
             Device,
-            L2CAP_PSM_HID_Service,
+            L2CAP_PSM_HID_Command,
             &scid);
 
         GetElementsByteArray(
@@ -506,8 +590,65 @@ Ds3InitHidReportStage(
             "<< HID_Command Index: %d, Length: %d",
             Device->InitHidStage - 1, hidCmdLen);
     }
-    else if (Device->IsServiceStarted)
+    else if (Device->IsHidCommandConfigured && !Device->IsHidInterruptEnabled)
     {
+        BYTE            hidCommandEnable[] = {
+            0x53, 0xF4, 0x42, 0x03, 0x00, 0x00
+        };
+        BYTE            hidOutputReport[] = {
+            0x52, 0x01, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x1E, 0xFF, 0x27, 0x10, 0x00,
+            0x32, 0xFF, 0x27, 0x10, 0x00, 0x32, 0xFF, 0x27,
+            0x10, 0x00, 0x32, 0xFF, 0x27, 0x10, 0x00, 0x32,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00
+        };
+
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
+            "Sending HID enable packet");
+
+
+        L2CAP_DEVICE_GET_SCID_FOR_TYPE(
+            Device,
+            L2CAP_PSM_HID_Command,
+            &scid);
+
+        status = HID_Command(
+            Context,
+            Device->HCI_ConnectionHandle,
+            scid,
+            hidCommandEnable,
+            _countof(hidCommandEnable));
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "HID_Command ENABLE failed");
+            return status;
+        }
+
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
+            "<< HID_Command ENABLE sent");
+
+        status = HID_Command(
+            Context,
+            Device->HCI_ConnectionHandle,
+            scid,
+            hidOutputReport,
+            _countof(hidOutputReport));
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "HID_Command OUTPUT REPORT failed");
+            return status;
+        }
+
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
+            "<< HID_Command OUTPUT REPORT sent");
+
+        Device->IsHidInterruptEnabled = TRUE;
+
+        /*
         L2CAP_DEVICE_GET_SCID_FOR_TYPE(Device, L2CAP_PSM_HID_Service, &scid);
         L2CAP_DEVICE_GET_DCID_FOR_TYPE(Device, L2CAP_PSM_HID_Service, &dcid);
 
@@ -526,6 +667,7 @@ Ds3InitHidReportStage(
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "L2CAP_Command_Disconnection_Request failed");
         }
+        */
 
         // TODO: implement child device arrival
         /*

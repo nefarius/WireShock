@@ -170,7 +170,6 @@ typedef enum _L2CAP_CONNECTION_RESPONSE_STATUS
 */
 typedef enum _L2CAP_PSM
 {
-    L2CAP_PSM_HID_Service = 0x01,
     L2CAP_PSM_HID_Command = 0x11,
     L2CAP_PSM_HID_Interrupt = 0x13
 
@@ -425,16 +424,6 @@ VOID FORCEINLINE L2CAP_SET_CONNECTION_TYPE(
         RtlCopyMemory(&Device->L2CAP_InterruptHandle.Source, &SourceChannelId, sizeof(BTH_HANDLE));
         RtlCopyMemory(&Device->L2CAP_InterruptHandle.Destination, DestinationChannelId, sizeof(BTH_HANDLE));
 
-        Device->CanStartService = TRUE;
-
-        break;
-    case L2CAP_PSM_HID_Service:
-        RtlCopyMemory(&Device->L2CAP_ServiceHandle.Source, &SourceChannelId, sizeof(BTH_HANDLE));
-        RtlCopyMemory(&Device->L2CAP_ServiceHandle.Destination, DestinationChannelId, sizeof(BTH_HANDLE));
-
-        Device->CanStartService = FALSE;
-        Device->IsServiceStarted = TRUE;
-
         break;
     default:
         break;
@@ -514,9 +503,6 @@ VOID FORCEINLINE L2CAP_DEVICE_GET_SCID_FOR_TYPE(
     case L2CAP_PSM_HID_Interrupt:
         RtlCopyMemory(SourceChannelId, &Device->L2CAP_InterruptHandle.Source, sizeof(L2CAP_CID));
         break;
-    case L2CAP_PSM_HID_Service:
-        RtlCopyMemory(SourceChannelId, &Device->L2CAP_ServiceHandle.Source, sizeof(L2CAP_CID));
-        break;
     }
 }
 
@@ -547,9 +533,6 @@ VOID FORCEINLINE L2CAP_DEVICE_GET_DCID_FOR_TYPE(
         break;
     case L2CAP_PSM_HID_Interrupt:
         RtlCopyMemory(DestinationChannelId, &Device->L2CAP_InterruptHandle.Destination, sizeof(L2CAP_CID));
-        break;
-    case L2CAP_PSM_HID_Service:
-        RtlCopyMemory(DestinationChannelId, &Device->L2CAP_ServiceHandle.Destination, sizeof(L2CAP_CID));
         break;
     }
 }
