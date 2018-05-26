@@ -9,15 +9,15 @@
 .Set Cabinet=on
 .Set Compress=on
 .Set CabinetNameTemplate=WireShock.cab
-.Set DestinationDir=WireShock\x64
+.Set DestinationDir=WireShock
 .\bin\x64\WireShock\WireShock.inf
 .\bin\x64\WireShock\WireShock.sys
 .\bin\x64\WireShock.pdb
 .\bin\x64\WireShock\WdfCoinstaller01009.dll
 .\bin\x64\WireShock\WireShockHidDevice.inf
-.Set DestinationDir=WireShock\x86
-.\bin\x86\WireShock\WireShock.inf
-.\bin\x86\WireShock\WireShock.sys
-.\bin\x86\WireShock.pdb
-.\bin\x86\WireShock\WdfCoinstaller01009.dll
-.\bin\x86\WireShock\WireShockHidDevice.inf
+;.Set DestinationDir=WireShock\x86
+;.\bin\x86\WireShock\WireShock.inf
+;.\bin\x86\WireShock\WireShock.sys
+;.\bin\x86\WireShock.pdb
+;.\bin\x86\WireShock\WdfCoinstaller01009.dll
+;.\bin\x86\WireShock\WireShockHidDevice.inf
