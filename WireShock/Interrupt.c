@@ -387,7 +387,7 @@ WireShockEvtUsbInterruptPipeReadComplete(
             // dongle effectively too old/unsupported 
             if (pDeviceContext->HciVersionMajor < 3 || pDeviceContext->LmpVersionMajor < 3)
             {
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
+                TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
                     "Unsupported Bluetooth Specification, aborting communication");
                 status = HCI_Command_Reset(pDeviceContext);
 

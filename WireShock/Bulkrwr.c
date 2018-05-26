@@ -235,7 +235,10 @@ WireShockEvtUsbBulkReadPipeReadComplete(
             {
                 PL2CAP_SIGNALLING_COMMAND_REJECT data = (PL2CAP_SIGNALLING_COMMAND_REJECT)&buffer[8];
 
-                TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, ">> L2CAP_Command_Reject: 0x%04X", data->Reason);
+                TraceEvents(TRACE_LEVEL_WARNING, 
+                    TRACE_BULKRWR, 
+                    ">> L2CAP_Command_Reject: 0x%04X", 
+                    data->Reason);
 
                 break;
             }
@@ -286,10 +289,9 @@ WireShockEvtUsbBulkReadPipeReadComplete(
             case L2CAP_Configuration_Response:
 
                 status = Ds3ConfigurationResponse(
-                    pDeviceContext,
                     pClientDevice,
-                    buffer,
-                    &CID);
+                    buffer
+                );
 
                 break;
 
@@ -312,16 +314,19 @@ WireShockEvtUsbBulkReadPipeReadComplete(
 
             case L2CAP_Disconnection_Response:
 
-                status = Ds3DisconnectionResponse(
-                    pDeviceContext,
-                    pClientDevice);
+                TraceEvents(TRACE_LEVEL_WARNING, 
+                    TRACE_BULKRWR, 
+                    ">> L2CAP_Disconnection_Response");
 
                 break;
 
 #pragma endregion
 
             default:
-                TraceEvents(TRACE_LEVEL_WARNING, TRACE_BULKRWR, "Unknown L2CAP command: 0x%02X", code);
+                TraceEvents(TRACE_LEVEL_WARNING, 
+                    TRACE_BULKRWR, 
+                    "Unknown L2CAP command: 0x%02X", 
+                    code);
                 break;
             }
         }
@@ -349,8 +354,8 @@ WireShockEvtUsbBulkReadPipeReadComplete(
     {
         status = Ds3InitHidReportStage(
             pDeviceContext,
-            pClientDevice,
-            &CID);
+            pClientDevice
+        );
     }
 
     //

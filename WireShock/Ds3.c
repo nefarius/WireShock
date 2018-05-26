@@ -343,20 +343,13 @@ NTSTATUS Ds3ConfigurationRequest(
 
 NTSTATUS
 Ds3ConfigurationResponse(
-    PDEVICE_CONTEXT Context,
     PBTH_DEVICE Device,
-    PUCHAR Buffer,
-    PUCHAR CID)
+    PUCHAR Buffer)
 {
     NTSTATUS    status = STATUS_SUCCESS;
-    L2CAP_CID   dcid;
     L2CAP_CID   scid;
 
     PL2CAP_SIGNALLING_CONFIGURATION_RESPONSE data = (PL2CAP_SIGNALLING_CONFIGURATION_RESPONSE)&Buffer[8];
-
-    UNREFERENCED_PARAMETER(CID);
-    UNREFERENCED_PARAMETER(Context);
-    UNREFERENCED_PARAMETER(dcid);
 
     scid = data->SCID;
 
@@ -377,32 +370,6 @@ Ds3ConfigurationResponse(
     {
         Device->IsHidInterruptEstablished = TRUE;
     }
-
-    /*
-    if (Device->CanStartService)
-    {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3, "Requesting service connection");
-
-        L2CAP_GET_NEW_CID(&dcid);
-
-        status = L2CAP_Command_Connection_Request(
-            Context,
-            Device->HCI_ConnectionHandle,
-            (*CID)++,
-            dcid,
-            L2CAP_PSM_HID_Service);
-
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "L2CAP_Command_Connection_Request failed");
-            return status;
-        }
-
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-            "<< L2CAP_Connection_Request SCID: %04X DCID: %04X",
-            *(PUSHORT)&scid, *(PUSHORT)&dcid);
-    }
-    */
 
     return status;
 }
@@ -472,93 +439,14 @@ Ds3DisconnectionRequest(
 }
 
 NTSTATUS
-Ds3DisconnectionResponse(
+Ds3InitHidReportStage(
     PDEVICE_CONTEXT Context,
     PBTH_DEVICE Device)
 {
-    NTSTATUS        status = STATUS_SUCCESS;
-    L2CAP_CID       scid;
-    BYTE            hidCommandEnable[] = {
-        0x53, 0xF4, 0x42, 0x03, 0x00, 0x00
-    };
-    BYTE            hidOutputReport[] = {
-        0x52, 0x01, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x1E, 0xFF, 0x27, 0x10, 0x00,
-        0x32, 0xFF, 0x27, 0x10, 0x00, 0x32, 0xFF, 0x27,
-        0x10, 0x00, 0x32, 0xFF, 0x27, 0x10, 0x00, 0x32,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00
-    };
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-        ">> L2CAP_Disconnection_Response");
-
-    if (Device->CanStartHid)
-    {
-        Device->IsServiceStarted = FALSE;
-
-        L2CAP_DEVICE_GET_SCID_FOR_TYPE(
-            Device,
-            L2CAP_PSM_HID_Command,
-            &scid);
-
-        status = HID_Command(
-            Context,
-            Device->HCI_ConnectionHandle,
-            scid,
-            hidCommandEnable,
-            _countof(hidCommandEnable));
-
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "HID_Command ENABLE failed");
-            return status;
-        }
-
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-            "<< HID_Command ENABLE sent");
-
-        status = HID_Command(
-            Context,
-            Device->HCI_ConnectionHandle,
-            scid,
-            hidOutputReport,
-            _countof(hidOutputReport));
-
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "HID_Command OUTPUT REPORT failed");
-            return status;
-        }
-
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-            "<< HID_Command OUTPUT REPORT sent");
-    }
-
-    return status;
-}
-
-NTSTATUS
-Ds3InitHidReportStage(
-    PDEVICE_CONTEXT Context,
-    PBTH_DEVICE Device,
-    PUCHAR CID)
-{
     NTSTATUS                        status = STATUS_SUCCESS;
-    L2CAP_CID                       dcid;
     L2CAP_CID                       scid;
     PVOID                           pHidCmd;
     ULONG                           hidCmdLen;
-    WDFREQUEST                      arrivalRequest;
-    //PAIRBENDER_GET_CLIENT_ARRIVAL   pArrival;
-    size_t                          buflen;
-
-    // TODO: remove!
-    UNREFERENCED_PARAMETER(buflen);
-    UNREFERENCED_PARAMETER(arrivalRequest);
-    UNREFERENCED_PARAMETER(CID);
-    UNREFERENCED_PARAMETER(dcid);
 
     if (Device->InitHidStage < DS3_INIT_HID_STAGE_MAX)
     {
@@ -592,10 +480,10 @@ Ds3InitHidReportStage(
     }
     else if (Device->IsHidCommandConfigured && !Device->IsHidInterruptEnabled)
     {
-        BYTE            hidCommandEnable[] = {
+        BYTE hidCommandEnable[] = {
             0x53, 0xF4, 0x42, 0x03, 0x00, 0x00
         };
-        BYTE            hidOutputReport[] = {
+        BYTE hidOutputReport[] = {
             0x52, 0x01, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x1E, 0xFF, 0x27, 0x10, 0x00,
             0x32, 0xFF, 0x27, 0x10, 0x00, 0x32, 0xFF, 0x27,
@@ -607,7 +495,6 @@ Ds3InitHidReportStage(
 
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
             "Sending HID enable packet");
-
 
         L2CAP_DEVICE_GET_SCID_FOR_TYPE(
             Device,
@@ -647,51 +534,6 @@ Ds3InitHidReportStage(
             "<< HID_Command OUTPUT REPORT sent");
 
         Device->IsHidInterruptEnabled = TRUE;
-
-        /*
-        L2CAP_DEVICE_GET_SCID_FOR_TYPE(Device, L2CAP_PSM_HID_Service, &scid);
-        L2CAP_DEVICE_GET_DCID_FOR_TYPE(Device, L2CAP_PSM_HID_Service, &dcid);
-
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-            "<< L2CAP_Disconnection_Request SCID: %04X DCID: %04X",
-            *(PUSHORT)&scid, *(PUSHORT)&dcid);
-
-        status = L2CAP_Command_Disconnection_Request(
-            Context,
-            Device->HCI_ConnectionHandle,
-            (*CID)++,
-            scid,
-            dcid);
-
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "L2CAP_Command_Disconnection_Request failed");
-        }
-        */
-
-        // TODO: implement child device arrival
-        /*
-        status = WdfIoQueueRetrieveNextRequest(
-            Context->ChildDeviceArrivalQueue,
-            &arrivalRequest);
-
-        if (NT_SUCCESS(status))
-        {
-            status = WdfRequestRetrieveOutputBuffer(
-                arrivalRequest,
-                sizeof(AIRBENDER_GET_CLIENT_ARRIVAL),
-                (LPVOID)&pArrival,
-                &buflen);
-
-            if (NT_SUCCESS(status))
-            {
-                pArrival->ClientAddress = Device->ClientAddress;
-                pArrival->DeviceType = Device->DeviceType;
-            }
-
-            WdfRequestCompleteWithInformation(arrivalRequest, status, buflen);
-        }
-        */
     }
 
     return status;
@@ -702,9 +544,6 @@ Ds3ProcessHidInputReport(
     PBTH_DEVICE Device,
     PUCHAR Buffer)
 {
-    UNREFERENCED_PARAMETER(Device);
-    UNREFERENCED_PARAMETER(Buffer);
-
     NTSTATUS    status = STATUS_INVALID_PARAMETER;
     WDFREQUEST  Request;
     PUCHAR      outputBuffer;
