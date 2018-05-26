@@ -296,48 +296,6 @@ NTSTATUS Ds3ConfigurationRequest(
         }
     }
 
-    /*
-    if (Device->IsServiceStarted)
-    {
-        Device->CanStartHid = TRUE;
-
-        if (Device->InitHidStage < DS3_INIT_HID_STAGE_MAX)
-        {
-            L2CAP_DEVICE_GET_SCID_FOR_TYPE(
-                Device,
-                L2CAP_PSM_HID_Service,
-                &scid);
-
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-                "! L2CAP_DEVICE_GET_SCID_FOR_TYPE: L2CAP_PSM_HID_Service -> SCID %04X",
-                *(PUSHORT)&scid);
-
-            GetElementsByteArray(
-                &Context->HidInitReports,
-                Device->InitHidStage++,
-                &pHidCmd,
-                &hidCmdLen);
-
-            status = HID_Command(
-                Context,
-                Device->HCI_ConnectionHandle,
-                scid,
-                pHidCmd,
-                hidCmdLen);
-
-            if (!NT_SUCCESS(status))
-            {
-                TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "HID_Command failed");
-                return status;
-            }
-
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-                "<< HID_Command Index: %d, Length: %d",
-                Device->InitHidStage - 1, hidCmdLen);
-        }
-    }
-    */
-
     return status;
 }
 
