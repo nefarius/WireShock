@@ -465,14 +465,6 @@ VOID FORCEINLINE L2CAP_DEVICE_GET_SCID(
     {
         RtlCopyMemory(SourceChannelId, &Device->L2CAP_InterruptHandle.Source, sizeof(BTH_HANDLE));
     }
-
-    if (RtlCompareMemory(
-        &Device->L2CAP_ServiceHandle.Destination,
-        &DestinationChannelId,
-        sizeof(BTH_HANDLE)) == sizeof(BTH_HANDLE))
-    {
-        RtlCopyMemory(SourceChannelId, &Device->L2CAP_ServiceHandle.Source, sizeof(BTH_HANDLE));
-    }
 }
 
 /**

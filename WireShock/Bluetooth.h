@@ -85,11 +85,6 @@ typedef struct _BTH_DEVICE
     BTH_HANDLE_PAIR L2CAP_InterruptHandle;
 
     //
-    // Handle identifying the L2CAP service channel
-    // 
-    BTH_HANDLE_PAIR L2CAP_ServiceHandle;
-
-    //
     // Indicates if the HID Command Channel is connected
     // 
     BOOLEAN IsHidCommandEstablished;
