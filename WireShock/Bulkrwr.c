@@ -262,10 +262,8 @@ WireShockEvtUsbBulkReadPipeReadComplete(
             case L2CAP_Connection_Response:
 
                 status = Ds3ConnectionResponse(
-                    pDeviceContext,
-                    pClientDevice,
-                    buffer,
-                    &CID);
+                    buffer
+                );
 
                 break;
 

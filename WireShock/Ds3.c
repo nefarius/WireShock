@@ -117,20 +117,13 @@ Ds3ConnectionRequest(
 
 NTSTATUS
 Ds3ConnectionResponse(
-    PDEVICE_CONTEXT Context,
-    PBTH_DEVICE Device,
-    PUCHAR Buffer,
-    PUCHAR CID)
+    PUCHAR Buffer)
 {
     NTSTATUS    status = STATUS_SUCCESS;
     L2CAP_CID   dcid;
     L2CAP_CID   scid;
 
     PL2CAP_SIGNALLING_CONNECTION_RESPONSE data = (PL2CAP_SIGNALLING_CONNECTION_RESPONSE)&Buffer[8];
-
-    UNREFERENCED_PARAMETER(CID);
-    UNREFERENCED_PARAMETER(Device);
-    UNREFERENCED_PARAMETER(Context);
 
     scid = data->SCID;
     dcid = data->DCID;
@@ -142,42 +135,8 @@ Ds3ConnectionResponse(
     switch ((L2CAP_CONNECTION_RESPONSE_RESULT)data->Result)
     {
     case L2CAP_ConnectionResponseResult_ConnectionSuccessful:
-
-        /*
-        L2CAP_SET_CONNECTION_TYPE(
-            Device,
-            L2CAP_PSM_HID_Service,
-            dcid,
-            &scid);
-
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-            "! L2CAP_SET_CONNECTION_TYPE: L2CAP_PSM_HID_Service SCID: %04X DCID: %04X",
-            *(PUSHORT)&scid, *(PUSHORT)&dcid);
-
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-            ">> >> L2CAP_ConnectionResponseResult_ConnectionSuccessful SCID: %04X DCID: %04X",
-            *(PUSHORT)&scid, *(PUSHORT)&dcid);
-
-        status = L2CAP_Command_Configuration_Request(
-            Context,
-            Device->HCI_ConnectionHandle,
-            (*CID)++,
-            dcid,
-            TRUE);
-
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3,
-                "L2CAP_Command_Configuration_Request failed");
-            break;
-        }
-
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-            "<< L2CAP_Configuration_Request SCID: %04X DCID: %04X",
-            *(PUSHORT)&scid, *(PUSHORT)&dcid);
-            *
-            */
-
+            ">> >> L2CAP_ConnectionResponseResult_ConnectionSuccessful");
         break;
     case L2CAP_ConnectionResponseResult_ConnectionPending:
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,

@@ -39,10 +39,7 @@ Ds3ConnectionRequest(
 
 NTSTATUS
 Ds3ConnectionResponse(
-    PDEVICE_CONTEXT Context,
-    PBTH_DEVICE Device,
-    PUCHAR Buffer,
-    PUCHAR CID);
+    PUCHAR Buffer);
 
 NTSTATUS
 Ds3ConfigurationRequest(
