@@ -35,6 +35,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\common\src\DsHid.c" />
     <ClCompile Include="..\common\src\UsbInterrupt.c" />
     <ClCompile Include="Bulkrwr.c" />
     <ClCompile Include="ByteArray.c" />
