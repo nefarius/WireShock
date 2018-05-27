@@ -109,7 +109,7 @@ Return Value:
         //
         status = WdfDeviceCreateDeviceInterface(
             device,
-            &GUID_DEVINTERFACE_WireShock,
+            &GUID_DEVINTERFACE_WIRESHOCK,
             NULL // ReferenceString
         );
 
