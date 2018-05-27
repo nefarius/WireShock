@@ -24,6 +24,7 @@ SOFTWARE.
 
 
 #include "Driver.h"
+#include <UsbInterrupt.h>
 
 NTSTATUS
 HCI_Command(
@@ -36,7 +37,7 @@ HCI_Command(
     ((PUCHAR)Buffer)[1] = (BYTE)(((ULONG)Command >> 8) & 0xFF);
     ((PUCHAR)Buffer)[2] = (BYTE)(BufferLength - 3);
 
-    return SendControlRequest(Context,
+    return SendControlRequest(Context->UsbDevice,
         BmRequestClass,
         0x0000,
         0,
