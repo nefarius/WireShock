@@ -38,7 +38,9 @@ HCI_Command(
     ((PUCHAR)Buffer)[2] = (BYTE)(BufferLength - 3);
 
     return SendControlRequest(Context->UsbDevice,
+        BmRequestHostToDevice,
         BmRequestClass,
+        BmRequestToDevice,
         0x0000,
         0,
         0,
