@@ -87,19 +87,11 @@ WireShockEvtUsbInterruptPipeReadComplete(
     HCI_COMMAND                             command;
     BD_ADDR                                 clientAddr;
     BTH_HANDLE                              clientHandle;
-    WDFREQUEST                              removalRequest;
-    //PAIRBENDER_GET_CLIENT_REMOVAL           pRemoval;
-    size_t                                  buflen;
-    PBTH_DEVICE                             pClientDevice;
     PDO_IDENTIFICATION_DESCRIPTION          childDesc;
     PDO_ADDRESS_DESCRIPTION                 childAddrDesc;
 
     UNREFERENCED_PARAMETER(Pipe);
 
-    // TODO: remove!
-    UNREFERENCED_PARAMETER(buflen);
-    UNREFERENCED_PARAMETER(pClientDevice);
-    UNREFERENCED_PARAMETER(removalRequest);
 
     if (NumBytesTransferred == 0) {
         TraceEvents(TRACE_LEVEL_WARNING, TRACE_INTERRUPT,
