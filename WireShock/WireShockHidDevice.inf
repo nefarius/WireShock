@@ -82,7 +82,7 @@ AddService = ,0x00000002,   ; NULL Service
 
 [Strings] 
 ;Localizable
-ProviderName        = "Benjamin Höglinger-Stelzer"
+ProviderName        = "Benjamin Höglinger-Stelzer and Mega"
 ManufacturerName    = "Benjamin Höglinger-Stelzer"
 WireShockHidDevice  = "WireShock HID Device" 
 customCollection    = "HID Vendor-defined Collection for WireShock Device"
