@@ -315,6 +315,8 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
 
     switch (IoControlCode)
     {
+#pragma region IOCTL_HID_GET_DEVICE_DESCRIPTOR
+
     case IOCTL_HID_GET_DEVICE_DESCRIPTOR:
 
         TraceEvents(TRACE_LEVEL_INFORMATION,
@@ -350,6 +352,11 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
         WdfRequestSetInformation(Request, bytesToCopy);
 
         break;
+
+#pragma endregion
+
+#pragma region IOCTL_HID_GET_REPORT_DESCRIPTOR
+
     case IOCTL_HID_GET_REPORT_DESCRIPTOR:
 
         TraceEvents(TRACE_LEVEL_INFORMATION,
@@ -397,6 +404,28 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
         WdfRequestSetInformation(Request, bytesToCopy);
 
         break;
+
+#pragma endregion
+
+#pragma region IOCTL_HID_GET_DEVICE_ATTRIBUTES
+
+    case IOCTL_HID_GET_DEVICE_ATTRIBUTES:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_WIREBUS,
+            ">> IOCTL_HID_GET_DEVICE_ATTRIBUTES");
+
+        //
+        // TODO: implement, you lazy bum!
+        // 
+        status = STATUS_SUCCESS;
+
+        break;
+
+#pragma endregion
+
+#pragma region IOCTL_HID_READ_REPORT
+
     case IOCTL_HID_READ_REPORT:
 
         TraceEvents(TRACE_LEVEL_INFORMATION,
@@ -428,11 +457,32 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
         status = STATUS_PENDING;
 
         break;
+
+#pragma endregion
+
+    case IOCTL_HID_SEND_IDLE_NOTIFICATION_REQUEST:  // METHOD_NEITHER
+                                                    //
+                                                    // This has the USBSS Idle notification callback. If the lower driver
+                                                    // can handle it (e.g. USB stack can handle it) then pass it down
+                                                    // otherwise complete it here as not inplemented. For a virtual
+                                                    // device, idling is not needed.
+                                                    //
+                                                    // Not implemented. fall through...
+                                                    //
+    case IOCTL_HID_ACTIVATE_DEVICE:                 // METHOD_NEITHER
+    case IOCTL_HID_DEACTIVATE_DEVICE:               // METHOD_NEITHER
+    case IOCTL_GET_PHYSICAL_DESCRIPTOR:             // METHOD_OUT_DIRECT
+                                                    //
+                                                    // We don't do anything for these IOCTLs but some minidrivers might.
+                                                    //
+                                                    // Not implemented. fall through...
+                                                    //
     default:
         TraceEvents(TRACE_LEVEL_WARNING,
             TRACE_WIREBUS,
             "Unhandled IoControlCode: 0x%X",
             IoControlCode);
+        status = STATUS_NOT_IMPLEMENTED;
         break;
     }
 
