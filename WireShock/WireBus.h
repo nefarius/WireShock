@@ -27,3 +27,15 @@ SOFTWARE.
 EVT_WDF_CHILD_LIST_CREATE_DEVICE WireShockEvtWdfChildListCreateDevice;
 EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL WireChildEvtWdfIoQueueIoInternalDeviceControl;
 EVT_WDF_CHILD_LIST_ADDRESS_DESCRIPTION_CLEANUP WireShockEvtWdfChildListAddressDescriptionCleanup;
+
+VOID FORCEINLINE REVERSE_BYTE_ARRAY(PUCHAR start, int size) 
+{
+    PUCHAR lo = start;
+    PUCHAR hi = start + size - 1;
+    UCHAR swap;
+    while (lo < hi) {
+        swap = *lo;
+        *lo++ = *hi;
+        *hi-- = swap;
+    }
+}

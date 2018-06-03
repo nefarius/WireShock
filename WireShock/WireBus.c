@@ -304,16 +304,24 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
 
-    NTSTATUS                        status = STATUS_SUCCESS;
-    size_t                          bytesToCopy = 0;
-    WDFMEMORY                       memory;
-    WDFDEVICE                       device;
-    PDO_ADDRESS_DESCRIPTION         addrDesc;
+    NTSTATUS                            status = STATUS_SUCCESS;
+    size_t                              bytesToCopy = 0;
+    WDFMEMORY                           memory;
+    WDFDEVICE                           device;
+    PDO_ADDRESS_DESCRIPTION             addrDesc;
+    HID_XFER_PACKET                     packet;
+    PDS_FEATURE_GET_HOST_BD_ADDR        pGetHostBdAddr;
+    PDS_FEATURE_GET_DEVICE_BD_ADDR      pGetDeviceBdAddr;
+    PDS_FEATURE_GET_DEVICE_TYPE         pGetDeviceType;
+    PDS_FEATURE_GET_CONNECTION_TYPE     pGetConnectionType;
+    PDEVICE_CONTEXT                     pParentCtx;
+    PDO_IDENTIFICATION_DESCRIPTION      identDesc;
 
     
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry (IoControlCode: 0x%X)", IoControlCode);
     
     device = WdfIoQueueGetDevice(WdfRequestGetIoQueue(Request));
+    pParentCtx = DeviceGetContext(WdfPdoGetParent(device));
 
     switch (IoControlCode)
     {
@@ -455,6 +463,108 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
         }
 
         status = STATUS_PENDING;
+
+        break;
+
+#pragma endregion
+
+#pragma region IOCTL_HID_GET_FEATURE
+
+    case IOCTL_HID_GET_FEATURE:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_WIREBUS,
+            ">> IOCTL_HID_GET_FEATURE");
+
+        status = DsHidRequestGetHidXferPacket_ToReadFromDevice(Request, &packet);
+
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_WIREBUS,
+                "Failed to read feature request (%!STATUS!)",
+                status);
+            break;
+        }
+
+        switch (packet.reportId)
+        {
+        case DS_FEATURE_TYPE_GET_HOST_BD_ADDR:
+
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_WIREBUS,
+                ">> >> DS_FEATURE_TYPE_GET_HOST_BD_ADDR");
+
+            pGetHostBdAddr = (PDS_FEATURE_GET_HOST_BD_ADDR)packet.reportBuffer;
+            pGetHostBdAddr->HostAddress = pParentCtx->BluetoothHostAddress;
+            REVERSE_BYTE_ARRAY(pGetHostBdAddr->HostAddress.Address, sizeof(BD_ADDR));
+
+            break;
+        case DS_FEATURE_TYPE_SET_HOST_BD_ADDR:
+
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_WIREBUS,
+                ">> >> DS_FEATURE_TYPE_SET_HOST_BD_ADDR");
+
+            status = STATUS_NOT_SUPPORTED;
+
+            break;
+        case DS_FEATURE_TYPE_GET_DEVICE_BD_ADDR:
+
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_WIREBUS,
+                ">> >> DS_FEATURE_TYPE_GET_DEVICE_BD_ADDR");
+
+            WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER_INIT(&identDesc.Header, sizeof(identDesc));
+            
+            status = WdfPdoRetrieveIdentificationDescription(device, &identDesc.Header);
+            if (!NT_SUCCESS(status)) {
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_WIREBUS,
+                    "WdfPdoRetrieveIdentificationDescription failed with status %!STATUS!",
+                    status);
+                break;
+            }
+
+            pGetDeviceBdAddr = (PDS_FEATURE_GET_DEVICE_BD_ADDR)packet.reportBuffer;
+            pGetDeviceBdAddr->DeviceAddress = identDesc.ClientAddress;
+
+            break;
+        case DS_FEATURE_TYPE_GET_DEVICE_TYPE:
+
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_WIREBUS,
+                ">> >> DS_FEATURE_TYPE_GET_DEVICE_TYPE");
+
+            WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(&addrDesc.Header, sizeof(addrDesc));
+
+            status = WdfPdoRetrieveAddressDescription(device, &addrDesc.Header);
+            if (!NT_SUCCESS(status)) {
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_WIREBUS,
+                    "WdfPdoRetrieveAddressDescription failed with status %!STATUS!",
+                    status);
+                break;
+            }
+
+            pGetDeviceType = (PDS_FEATURE_GET_DEVICE_TYPE)packet.reportBuffer;
+            pGetDeviceType->DeviceType = addrDesc.ChildDevice.DeviceType;
+
+            break;
+        case DS_FEATURE_TYPE_GET_CONNECTION_TYPE:
+
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_WIREBUS,
+                ">> >> DS_FEATURE_TYPE_GET_DEVICE_TYPE");
+
+            pGetConnectionType = (PDS_FEATURE_GET_CONNECTION_TYPE)packet.reportBuffer;
+            pGetConnectionType->ConnectionType = DsConnectionBluetooth;
+
+            break;
+        default:
+            break;
+        }
+
+        WdfRequestSetInformation(Request, packet.reportBufferLen);
 
         break;
 
