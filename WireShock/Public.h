@@ -26,26 +26,3 @@ DEFINE_GUID (GUID_DEVINTERFACE_WIRESHOCK,
 
 #pragma once
 
-/**
-* \typedef struct _BD_ADDR
-*
-* \brief   Defines a Bluetooth client MAC address.
-*/
-typedef struct _BD_ADDR
-{
-    BYTE Address[6];
-
-} BD_ADDR, *PBD_ADDR;
-
-/**
-* \typedef enum _BTH_DEVICE_TYPE
-*
-* \brief   Defines an alias representing the possible types of the BTH_DEVICE.
-*/
-typedef enum _BTH_DEVICE_TYPE
-{
-    DsTypeUnknown,
-    DualShock3,
-    DualShock4
-
-} BTH_DEVICE_TYPE;

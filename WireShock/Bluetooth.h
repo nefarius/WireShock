@@ -105,16 +105,6 @@ typedef struct _BTH_DEVICE
     BOOLEAN IsHidInterruptConfigured;
 
     //
-    // Indicates if the HID Interrupt Enable Magic Packet has been invoked
-    // 
-    BOOLEAN IsHidInterruptEnabled;
-
-    //
-    // Index of the current HID initialization packet
-    // 
-    BYTE InitHidStage;
-
-    //
     // Name reported by this device
     // 
     LPSTR RemoteName;
@@ -122,7 +112,7 @@ typedef struct _BTH_DEVICE
     //
     // Controller type
     // 
-    BTH_DEVICE_TYPE DeviceType;
+    DS_DEVICE_TYPE DeviceType;
 
     //
     // Framework queue storing HID input requests
@@ -272,7 +262,7 @@ VOID
 WireBusSetChildDeviceType(
     _In_ WDFDEVICE Device,
     _In_ PBD_ADDR Address,
-    _In_ BTH_DEVICE_TYPE DeviceType
+    _In_ DS_DEVICE_TYPE DeviceType
 );
 
 VOID

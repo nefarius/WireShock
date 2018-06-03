@@ -287,6 +287,7 @@ WireShockEvtUsbBulkReadPipeReadComplete(
             case L2CAP_Configuration_Response:
 
                 status = Ds3ConfigurationResponse(
+                    pDeviceContext,
                     pClientDevice,
                     buffer
                 );
@@ -342,18 +343,11 @@ WireShockEvtUsbBulkReadPipeReadComplete(
 
             TraceEvents(TRACE_LEVEL_WARNING, 
                 TRACE_BULKRWR, 
-                "Unknown BTH_DEVICE_TYPE: 0x%02X", 
+                "Unknown DS_DEVICE_TYPE: 0x%02X", 
                 pClientDevice->DeviceType);
 
             break;
         }
-    }
-    else
-    {
-        status = Ds3InitHidReportStage(
-            pDeviceContext,
-            pClientDevice
-        );
     }
 
     //

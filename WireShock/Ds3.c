@@ -170,8 +170,6 @@ NTSTATUS Ds3ConfigurationRequest(
     NTSTATUS    status;
     L2CAP_CID   dcid;
     L2CAP_CID   scid;
-    PVOID       pHidCmd;
-    ULONG       hidCmdLen;
 
     PL2CAP_SIGNALLING_CONFIGURATION_REQUEST data = (PL2CAP_SIGNALLING_CONFIGURATION_REQUEST)&Buffer[8];
 
@@ -218,49 +216,12 @@ NTSTATUS Ds3ConfigurationRequest(
         "<< L2CAP_Configuration_Response SCID: %04X DCID: %04X",
         *(PUSHORT)&scid, *(PUSHORT)&dcid);
 
-    if (Device->IsHidCommandConfigured)
-    {
-        if (Device->InitHidStage < DS3_INIT_HID_STAGE_MAX)
-        {
-            L2CAP_DEVICE_GET_SCID_FOR_TYPE(
-                Device,
-                L2CAP_PSM_HID_Command,
-                &scid);
-
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-                "!! L2CAP_DEVICE_GET_SCID_FOR_TYPE: L2CAP_PSM_HID_Command -> SCID %04X",
-                *(PUSHORT)&scid);
-
-            GetElementsByteArray(
-                &Context->HidInitReports,
-                Device->InitHidStage++,
-                &pHidCmd,
-                &hidCmdLen);
-
-            status = HID_Command(
-                Context,
-                Device->HCI_ConnectionHandle,
-                scid,
-                pHidCmd,
-                hidCmdLen);
-
-            if (!NT_SUCCESS(status))
-            {
-                TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "HID_Command failed");
-                return status;
-            }
-
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-                "<< HID_Command Index: %d, Length: %d",
-                Device->InitHidStage - 1, hidCmdLen);
-        }
-    }
-
     return status;
 }
 
 NTSTATUS
 Ds3ConfigurationResponse(
+    PDEVICE_CONTEXT Context,
     PBTH_DEVICE Device,
     PUCHAR Buffer)
 {
@@ -287,6 +248,62 @@ Ds3ConfigurationResponse(
     if (RtlCompareMemory(&scid, &dcid_tmp, sizeof(L2CAP_CID)) == sizeof(L2CAP_CID))
     {
         Device->IsHidInterruptEstablished = TRUE;
+    }
+
+    if (Device->IsHidCommandEstablished)
+    {
+        BYTE hidCommandEnable[] = {
+            0x53, 0xF4, 0x42, 0x03, 0x00, 0x00
+        };
+        BYTE hidOutputReport[] = {
+            0x52, 0x01, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x1E, 0xFF, 0x27, 0x10, 0x00,
+            0x32, 0xFF, 0x27, 0x10, 0x00, 0x32, 0xFF, 0x27,
+            0x10, 0x00, 0x32, 0xFF, 0x27, 0x10, 0x00, 0x32,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00
+        };
+
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
+            "Sending HID enable packet");
+
+        L2CAP_DEVICE_GET_SCID_FOR_TYPE(
+            Device,
+            L2CAP_PSM_HID_Command,
+            &scid);
+
+        status = HID_Command(
+            Context,
+            Device->HCI_ConnectionHandle,
+            scid,
+            hidCommandEnable,
+            _countof(hidCommandEnable));
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "HID_Command ENABLE failed");
+            return status;
+        }
+
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
+            "<< HID_Command ENABLE sent");
+
+        status = HID_Command(
+            Context,
+            Device->HCI_ConnectionHandle,
+            scid,
+            hidOutputReport,
+            _countof(hidOutputReport));
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "HID_Command OUTPUT REPORT failed");
+            return status;
+        }
+
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
+            "<< HID_Command OUTPUT REPORT sent");
     }
 
     return status;
@@ -352,107 +369,6 @@ Ds3DisconnectionRequest(
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
         "<< L2CAP_Disconnection_Response SCID: %04X DCID: %04X",
         *(PUSHORT)&scid, *(PUSHORT)&dcid);
-
-    return status;
-}
-
-NTSTATUS
-Ds3InitHidReportStage(
-    PDEVICE_CONTEXT Context,
-    PBTH_DEVICE Device)
-{
-    NTSTATUS                        status = STATUS_SUCCESS;
-    L2CAP_CID                       scid;
-    PVOID                           pHidCmd;
-    ULONG                           hidCmdLen;
-
-    if (Device->InitHidStage < DS3_INIT_HID_STAGE_MAX)
-    {
-        L2CAP_DEVICE_GET_SCID_FOR_TYPE(
-            Device,
-            L2CAP_PSM_HID_Command,
-            &scid);
-
-        GetElementsByteArray(
-            &Context->HidInitReports,
-            Device->InitHidStage++,
-            &pHidCmd,
-            &hidCmdLen);
-
-        status = HID_Command(
-            Context,
-            Device->HCI_ConnectionHandle,
-            scid,
-            pHidCmd,
-            hidCmdLen);
-
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "HID_Command failed");
-            return status;
-        }
-
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-            "<< HID_Command Index: %d, Length: %d",
-            Device->InitHidStage - 1, hidCmdLen);
-    }
-    else if (Device->IsHidCommandConfigured && !Device->IsHidInterruptEnabled)
-    {
-        BYTE hidCommandEnable[] = {
-            0x53, 0xF4, 0x42, 0x03, 0x00, 0x00
-        };
-        BYTE hidOutputReport[] = {
-            0x52, 0x01, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x1E, 0xFF, 0x27, 0x10, 0x00,
-            0x32, 0xFF, 0x27, 0x10, 0x00, 0x32, 0xFF, 0x27,
-            0x10, 0x00, 0x32, 0xFF, 0x27, 0x10, 0x00, 0x32,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00
-        };
-
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-            "Sending HID enable packet");
-
-        L2CAP_DEVICE_GET_SCID_FOR_TYPE(
-            Device,
-            L2CAP_PSM_HID_Command,
-            &scid);
-
-        status = HID_Command(
-            Context,
-            Device->HCI_ConnectionHandle,
-            scid,
-            hidCommandEnable,
-            _countof(hidCommandEnable));
-
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "HID_Command ENABLE failed");
-            return status;
-        }
-
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-            "<< HID_Command ENABLE sent");
-
-        status = HID_Command(
-            Context,
-            Device->HCI_ConnectionHandle,
-            scid,
-            hidOutputReport,
-            _countof(hidOutputReport));
-
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "HID_Command OUTPUT REPORT failed");
-            return status;
-        }
-
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-            "<< HID_Command OUTPUT REPORT sent");
-
-        Device->IsHidInterruptEnabled = TRUE;
-    }
 
     return status;
 }

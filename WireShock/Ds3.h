@@ -49,6 +49,7 @@ Ds3ConfigurationRequest(
 
 NTSTATUS
 Ds3ConfigurationResponse(
+    PDEVICE_CONTEXT Context,
     PBTH_DEVICE Device,
     PUCHAR Buffer);
 
@@ -57,11 +58,6 @@ Ds3DisconnectionRequest(
     PDEVICE_CONTEXT Context,
     PBTH_DEVICE Device,
     PUCHAR Buffer);
-
-NTSTATUS
-Ds3InitHidReportStage(
-    PDEVICE_CONTEXT Context,
-    PBTH_DEVICE Device);
 
 NTSTATUS
 Ds3ProcessHidInputReport(

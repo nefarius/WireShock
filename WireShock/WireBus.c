@@ -612,7 +612,7 @@ VOID WireBusSetChildHandle(WDFDEVICE Device, PBD_ADDR Address, PBTH_HANDLE Handl
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");
 }
 
-VOID WireBusSetChildDeviceType(WDFDEVICE Device, PBD_ADDR Address, BTH_DEVICE_TYPE DeviceType)
+VOID WireBusSetChildDeviceType(WDFDEVICE Device, PBD_ADDR Address, DS_DEVICE_TYPE DeviceType)
 {
     PDO_ADDRESS_DESCRIPTION                 childAddrDesc;
 

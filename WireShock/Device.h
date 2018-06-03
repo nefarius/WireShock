@@ -50,8 +50,6 @@ typedef struct _DEVICE_CONTEXT
 
     BOOLEAN Initialized;
 
-    BYTE_ARRAY HidInitReports;
-
     BYTE HciVersionMajor;
 
     BYTE LmpVersionMajor;
@@ -79,9 +77,5 @@ WireShockCreateDevice(
 //
 EVT_WDF_DEVICE_PREPARE_HARDWARE WireShockEvtDevicePrepareHardware;
 EVT_WDF_DEVICE_D0_ENTRY WireShockEvtDeviceD0Entry;
-
-VOID
-InitHidInitReports(
-    IN PDEVICE_CONTEXT Context);
 
 EXTERN_C_END

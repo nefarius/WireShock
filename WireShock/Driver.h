@@ -29,6 +29,7 @@ SOFTWARE.
 #include <wdfusb.h>
 #include <initguid.h>
 
+#include <DsCommon.h>
 #include "WireShock.h"
 #include "ByteArray.h"
 #include "WireBus.h"

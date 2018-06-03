@@ -45,7 +45,9 @@ HCI_Command(
         0,
         0,
         Buffer,
-        BufferLength);
+        BufferLength,
+        NULL,
+        NULL);
 }
 
 NTSTATUS
