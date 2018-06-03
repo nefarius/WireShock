@@ -636,6 +636,8 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
             //
             // Remote name is used to distinguish device type
+            // 
+            // TODO: distinguish Navigation Controller etc. here as well!
             //
             WireBusSetChildDeviceType(
                 Device,
