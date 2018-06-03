@@ -310,8 +310,10 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
     WDFDEVICE                       device;
     PDO_ADDRESS_DESCRIPTION         addrDesc;
 
+    
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry (IoControlCode: 0x%X)", IoControlCode);
     
+    device = WdfIoQueueGetDevice(WdfRequestGetIoQueue(Request));
 
     switch (IoControlCode)
     {
@@ -432,8 +434,6 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
             TRACE_WIREBUS,
             ">> IOCTL_HID_READ_REPORT");
 
-        device = WdfIoQueueGetDevice(WdfRequestGetIoQueue(Request));
-
         WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(&addrDesc.Header, sizeof(addrDesc));
 
         status = WdfPdoRetrieveAddressDescription(device, &addrDesc.Header);
@@ -456,6 +456,54 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
 
         status = STATUS_PENDING;
 
+        break;
+
+#pragma endregion
+
+#pragma region IOCTL_HID_GET_STRING
+
+    case IOCTL_HID_GET_STRING:                      // METHOD_NEITHER
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_WIREBUS,
+            ">> IOCTL_HID_GET_STRING");
+
+        WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(&addrDesc.Header, sizeof(addrDesc));
+
+        status = WdfPdoRetrieveAddressDescription(device, &addrDesc.Header);
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_WIREBUS,
+                "WdfPdoRetrieveAddressDescription failed with status %!STATUS!",
+                status);
+            break;
+        }
+
+        status = DsHidGetString(Request, addrDesc.ChildDevice.DeviceType);
+        break;
+
+#pragma endregion
+
+#pragma region IOCTL_HID_GET_INDEXED_STRING
+
+    case IOCTL_HID_GET_INDEXED_STRING:              // METHOD_OUT_DIRECT
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_WIREBUS,
+            ">> IOCTL_HID_GET_INDEXED_STRING");
+
+        WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(&addrDesc.Header, sizeof(addrDesc));
+
+        status = WdfPdoRetrieveAddressDescription(device, &addrDesc.Header);
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_WIREBUS,
+                "WdfPdoRetrieveAddressDescription failed with status %!STATUS!",
+                status);
+            break;
+        }
+
+        status = DsHidGetIndexedString(Request, addrDesc.ChildDevice.DeviceType);
         break;
 
 #pragma endregion
