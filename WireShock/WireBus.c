@@ -527,6 +527,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
 
             pGetDeviceBdAddr = (PDS_FEATURE_GET_DEVICE_BD_ADDR)packet.reportBuffer;
             pGetDeviceBdAddr->DeviceAddress = identDesc.ClientAddress;
+            REVERSE_BYTE_ARRAY(pGetDeviceBdAddr->DeviceAddress.Address, sizeof(BD_ADDR));
 
             break;
         case DS_FEATURE_TYPE_GET_DEVICE_TYPE:
