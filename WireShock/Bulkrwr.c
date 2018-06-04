@@ -148,7 +148,7 @@ HID_Command(
 )
 {
     NTSTATUS status;
-    PUCHAR buffer = ExAllocatePoolWithTag(NonPagedPool, BufferLength + 8, WIRESHOCK_POOL_TAG);
+    PUCHAR buffer = ExAllocatePoolWithTag(NonPagedPoolNx, BufferLength + 8, WIRESHOCK_POOL_TAG);
 
     buffer[0] = Handle.Lsb;
     buffer[1] = Handle.Msb;
