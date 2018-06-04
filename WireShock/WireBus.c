@@ -234,8 +234,6 @@ WireShockEvtWdfChildListCreateDevice(
 
 #pragma endregion
 
-#pragma region HID Input Report Queue creation
-
     WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(&addrDesc.Header, sizeof(addrDesc));
 
     status = WdfPdoRetrieveAddressDescription(hChild, &addrDesc.Header);
@@ -246,6 +244,8 @@ WireShockEvtWdfChildListCreateDevice(
         return status;
     }
 
+#pragma region HID Input Report Queue creation
+    
     WDF_IO_QUEUE_CONFIG_INIT(&inputQueueCfg, WdfIoQueueDispatchManual);
     status = WdfIoQueueCreate(
         hChild,
@@ -259,6 +259,10 @@ WireShockEvtWdfChildListCreateDevice(
             status);
         return status;
     }
+
+#pragma endregion
+
+#pragma region HID Output Report Timer creation
 
     WDF_TIMER_CONFIG_INIT_PERIODIC(
         &outTimerCfg,
@@ -281,6 +285,8 @@ WireShockEvtWdfChildListCreateDevice(
         return status;
     }
 
+#pragma endregion
+
     status = WdfPdoUpdateAddressDescription(hChild, &addrDesc.Header);
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
@@ -288,8 +294,6 @@ WireShockEvtWdfChildListCreateDevice(
             status);
         return status;
     }
-
-#pragma endregion
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit with status %!STATUS!", status);
 
@@ -942,5 +946,50 @@ WireChildOutputReportEvtTimerFunc(
     WDFTIMER  Timer
 )
 {
-    UNREFERENCED_PARAMETER(Timer);
+    NTSTATUS                    status;
+    WDFDEVICE                   device;
+    PDO_ADDRESS_DESCRIPTION     addrDesc;
+    L2CAP_CID                   scid;
+    PDEVICE_CONTEXT             pParentCtx;
+
+    device = WdfTimerGetParentObject(Timer);
+    pParentCtx = DeviceGetContext(WdfPdoGetParent(device));
+
+    WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(&addrDesc.Header, sizeof(addrDesc));
+
+    status = WdfPdoRetrieveAddressDescription(device, &addrDesc.Header);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_WIREBUS,
+            "WdfPdoRetrieveAddressDescription failed with status %!STATUS!",
+            status);
+        return;
+    }
+
+    L2CAP_DEVICE_GET_SCID_FOR_TYPE(
+        &addrDesc.ChildDevice,
+        L2CAP_PSM_HID_Command,
+        &scid);
+
+    switch (addrDesc.ChildDevice.DeviceType)
+    {
+    case DS_DEVICE_TYPE_PS3_DUALSHOCK:
+
+        status = HID_Command(
+            pParentCtx,
+            addrDesc.ChildDevice.HCI_ConnectionHandle,
+            scid,
+            addrDesc.ChildDevice.OutputReportBuffer,
+            DS3_HID_OUTPUT_REPORT_SIZE);
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE, "HID_Command failed with status %!STATUS!", status);
+        }
+
+        break;
+    default:
+        break;
+    }
 }

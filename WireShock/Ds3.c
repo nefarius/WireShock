@@ -295,6 +295,11 @@ Ds3ConfigurationResponse(
 
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
             "<< HID_Command OUTPUT REPORT sent");
+
+        WdfTimerStart(
+            Device->OutputReportTimer,
+            WDF_REL_TIMEOUT_IN_MS(DS_ORT_PERIODIC_DUE_TIME)
+        );
     }
 
     return status;

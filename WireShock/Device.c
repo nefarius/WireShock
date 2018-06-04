@@ -383,7 +383,6 @@ NTSTATUS WireShockEvtDeviceD0Exit(
     //
     // Reset host
     // 
-    pDeviceContext->Started = TRUE; // will prohibit further initialization
     HCI_Command_Reset(pDeviceContext);
     
     //
