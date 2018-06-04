@@ -75,12 +75,12 @@ WireShockEvtWdfChildListCreateDevice(
     TraceEvents(TRACE_LEVEL_INFORMATION,
         TRACE_WIREBUS,
         "Plugging in device with address %02X:%02X:%02X:%02X:%02X:%02X",
-        pDesc->ClientAddress.Address[0],
-        pDesc->ClientAddress.Address[1],
-        pDesc->ClientAddress.Address[2],
-        pDesc->ClientAddress.Address[3],
+        pDesc->ClientAddress.Address[5],
         pDesc->ClientAddress.Address[4],
-        pDesc->ClientAddress.Address[5]);
+        pDesc->ClientAddress.Address[3],
+        pDesc->ClientAddress.Address[2],
+        pDesc->ClientAddress.Address[1],
+        pDesc->ClientAddress.Address[0]);
 
 #pragma region PDO Properties
 
