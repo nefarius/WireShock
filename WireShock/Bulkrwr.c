@@ -334,7 +334,7 @@ WireShockEvtUsbBulkReadPipeReadComplete(
     {
         switch (pClientDevice->DeviceType)
         {
-        case DualShock3:
+        case DS_DEVICE_TYPE_PS3_DUALSHOCK:
 
             status = Ds3ProcessHidInputReport(pClientDevice, buffer);
 

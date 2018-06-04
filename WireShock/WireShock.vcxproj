@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\include\DsHid.h" />
+    <ClInclude Include="..\common\include\km\DsDriver.h" />
     <ClInclude Include="..\common\include\UsbInterrupt.h" />
     <ClInclude Include="Bluetooth.h" />
     <ClInclude Include="Bulkrwr.h" />

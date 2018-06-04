@@ -78,6 +78,9 @@
     <ClInclude Include="..\common\include\UsbInterrupt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\include\km\DsDriver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Device.c">

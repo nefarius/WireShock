@@ -27,6 +27,7 @@ SOFTWARE.
 #define NTSTRSAFE_LIB
 #include <ntstrsafe.h>
 #include <DsHid.h>
+#include <km/DsDriver.h>
 
 
 #ifdef ALLOC_PRAGMA
@@ -54,6 +55,8 @@ WireShockEvtWdfChildListCreateDevice(
     WDFQUEUE                        defaultQueue;
     WDF_IO_QUEUE_CONFIG             inputQueueCfg;
     PDO_ADDRESS_DESCRIPTION         addrDesc;
+    WDF_TIMER_CONFIG                outTimerCfg;
+    WDF_OBJECT_ATTRIBUTES           outTimerAttribs;
 
     DECLARE_CONST_UNICODE_STRING(deviceLocation, L"WireShock Bus Device");
     DECLARE_UNICODE_STRING_SIZE(buffer, MAX_DEVICE_ID_LEN);
@@ -79,6 +82,8 @@ WireShockEvtWdfChildListCreateDevice(
         pDesc->ClientAddress.Address[3],
         pDesc->ClientAddress.Address[4],
         pDesc->ClientAddress.Address[5]);
+
+#pragma region PDO Properties
 
     //
     // PDO features
@@ -172,6 +177,8 @@ WireShockEvtWdfChildListCreateDevice(
 
     WdfPdoInitSetDefaultLocale(ChildInit, 0x409);
 
+#pragma endregion
+
 #pragma region Child device creation
 
     WDF_OBJECT_ATTRIBUTES_INIT(&pdoAttributes);
@@ -242,14 +249,35 @@ WireShockEvtWdfChildListCreateDevice(
 
     WDF_IO_QUEUE_CONFIG_INIT(&inputQueueCfg, WdfIoQueueDispatchManual);
     status = WdfIoQueueCreate(
-        hChild, 
-        &inputQueueCfg, 
-        WDF_NO_OBJECT_ATTRIBUTES, 
+        hChild,
+        &inputQueueCfg,
+        WDF_NO_OBJECT_ATTRIBUTES,
         &addrDesc.ChildDevice.HidInputReportQueue
     );
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
             "WdfIoQueueCreate failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    WDF_TIMER_CONFIG_INIT_PERIODIC(
+        &outTimerCfg,
+        WireChildOutputReportEvtTimerFunc,
+        DS_ORT_START_DELAY
+    );
+    WDF_OBJECT_ATTRIBUTES_INIT(&outTimerAttribs);
+    outTimerAttribs.ParentObject = hChild;
+
+    status = WdfTimerCreate(
+        &outTimerCfg,
+        &outTimerAttribs, 
+        &addrDesc.ChildDevice.OutputReportTimer
+    );
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DRIVER,
+            "WdfTimerCreate failed with status %!STATUS!",
             status);
         return status;
     }
@@ -317,9 +345,9 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
     PDEVICE_CONTEXT                     pParentCtx;
     PDO_IDENTIFICATION_DESCRIPTION      identDesc;
 
-    
+
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry (IoControlCode: 0x%X)", IoControlCode);
-    
+
     device = WdfIoQueueGetDevice(WdfRequestGetIoQueue(Request));
     pParentCtx = DeviceGetContext(WdfPdoGetParent(device));
 
@@ -446,7 +474,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
 
         status = WdfPdoRetrieveAddressDescription(device, &addrDesc.Header);
         if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_ERROR, 
+            TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_WIREBUS,
                 "WdfPdoRetrieveAddressDescription failed with status %!STATUS!",
                 status);
@@ -455,7 +483,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
 
         status = WdfRequestForwardToIoQueue(Request, addrDesc.ChildDevice.HidInputReportQueue);
         if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_ERROR, 
+            TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_WIREBUS,
                 "WdfRequestForwardToIoQueue failed with status %!STATUS!",
                 status);
@@ -515,7 +543,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
                 ">> >> DS_FEATURE_TYPE_GET_DEVICE_BD_ADDR");
 
             WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER_INIT(&identDesc.Header, sizeof(identDesc));
-            
+
             status = WdfPdoRetrieveIdentificationDescription(device, &identDesc.Header);
             if (!NT_SUCCESS(status)) {
                 TraceEvents(TRACE_LEVEL_ERROR,
@@ -558,7 +586,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
                 ">> >> DS_FEATURE_TYPE_GET_DEVICE_TYPE");
 
             pGetConnectionType = (PDS_FEATURE_GET_CONNECTION_TYPE)packet.reportBuffer;
-            pGetConnectionType->ConnectionType = DsConnectionBluetooth;
+            pGetConnectionType->ConnectionType = DS_CONNECTION_TYPE_BLUETOOTH;
 
             break;
         default:
@@ -866,3 +894,11 @@ VOID WireBusSetChildRemoteName(WDFDEVICE Device, PBD_ADDR Address, PUCHAR Buffer
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");
 }
 
+_Use_decl_annotations_
+VOID
+WireChildOutputReportEvtTimerFunc(
+    WDFTIMER  Timer
+)
+{
+    UNREFERENCED_PARAMETER(Timer);
+}

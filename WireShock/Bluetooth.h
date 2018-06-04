@@ -119,6 +119,16 @@ typedef struct _BTH_DEVICE
     // 
     WDFQUEUE HidInputReportQueue;
 
+    //
+    // Timer for re-occurring output reports
+    // 
+    WDFTIMER OutputReportTimer;
+
+    //
+    // HID Output Report Buffer
+    // 
+    PUCHAR OutputReportBuffer;
+
 } BTH_DEVICE, *PBTH_DEVICE;
 
 /**

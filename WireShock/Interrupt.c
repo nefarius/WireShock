@@ -634,16 +634,43 @@ WireShockEvtUsbInterruptPipeReadComplete(
                 length
             );
 
-            //
-            // Remote name is used to distinguish device type
-            // 
-            // TODO: distinguish Navigation Controller etc. here as well!
-            //
-            WireBusSetChildDeviceType(
-                Device,
-                &clientAddr,
-                (strcmp("Wireless Controller", (LPCSTR)&buffer[9]) == 0) ? DualShock4 : DualShock3
-            );
+            switch (buffer[9])
+            {
+            case 'P': // First letter in PLAYSTATION(R)3 Controller ('P')
+                WireBusSetChildDeviceType(
+                    Device,
+                    &clientAddr,
+                    DS_DEVICE_TYPE_PS3_DUALSHOCK
+                );
+                break;
+            case 'N': // First letter in Navigation Controller ('N')
+                WireBusSetChildDeviceType(
+                    Device,
+                    &clientAddr,
+                    DS_DEVICE_TYPE_PS3_NAVIGATION
+                );
+                break;
+            case 'M': // First letter in Motion Controller ('M')
+                WireBusSetChildDeviceType(
+                    Device,
+                    &clientAddr,
+                    DS_DEVICE_TYPE_PS3_MOTION
+                );
+                break;
+            case 'W': // First letter in Wireless Controller ('W')
+                WireBusSetChildDeviceType(
+                    Device,
+                    &clientAddr,
+                    DS_DEVICE_TYPE_PS4_DUALSHOCK
+                );
+                break;
+            default:
+                TraceEvents(TRACE_LEVEL_ERROR, 
+                    TRACE_INTERRUPT, 
+                    "Couldn't determine device type from remote name"
+                );
+                break;
+            }
         }
 
         break;
