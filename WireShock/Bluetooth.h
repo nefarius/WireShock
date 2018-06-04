@@ -282,3 +282,9 @@ WireBusSetChildRemoteName(
     _In_ PUCHAR Buffer,
     _In_ ULONG BufferLength
 );
+
+VOID
+WireBusInitChildOutputReport(
+    _In_ WDFDEVICE Device,
+    _In_ PBD_ADDR Address
+);

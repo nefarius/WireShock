@@ -671,6 +671,11 @@ WireShockEvtUsbInterruptPipeReadComplete(
                 );
                 break;
             }
+
+            //
+            // Initialize the correct output report matching device type
+            // 
+            WireBusInitChildOutputReport(Device, &clientAddr);
         }
 
         break;

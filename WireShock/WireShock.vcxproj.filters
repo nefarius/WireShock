@@ -119,6 +119,9 @@
     <ClCompile Include="..\common\src\DsHid.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\src\DsDriver.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="WireShock.rc">

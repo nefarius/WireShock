@@ -318,6 +318,11 @@ WireShockEvtWdfChildListAddressDescriptionCleanup(
         ExFreePoolWithTag(pAddrDesc->ChildDevice.RemoteName, WIRESHOCK_POOL_TAG);
         pAddrDesc->ChildDevice.RemoteName = NULL;
     }
+
+    if (pAddrDesc->ChildDevice.OutputReportBuffer != NULL) {
+        ExFreePoolWithTag(pAddrDesc->ChildDevice.OutputReportBuffer, WIRESHOCK_POOL_TAG);
+        pAddrDesc->ChildDevice.OutputReportBuffer = NULL;
+    }
 }
 
 void WireChildEvtWdfIoQueueIoInternalDeviceControl(
@@ -887,6 +892,44 @@ VOID WireBusSetChildRemoteName(WDFDEVICE Device, PBD_ADDR Address, PUCHAR Buffer
             TRACE_WIREBUS,
             "Set device name to: %s",
             childAddrDesc.ChildDevice.RemoteName);
+
+        WireBusSetPdoAddressDescription(Device, Address, &childAddrDesc);
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");
+}
+
+VOID WireBusInitChildOutputReport(WDFDEVICE Device, PBD_ADDR Address)
+{
+    PDO_ADDRESS_DESCRIPTION                 childAddrDesc;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
+
+    if (WireBusGetPdoAddressDescription(Device, Address, &childAddrDesc))
+    {
+        if (childAddrDesc.ChildDevice.OutputReportBuffer != NULL) {
+            ExFreePoolWithTag(childAddrDesc.ChildDevice.OutputReportBuffer, WIRESHOCK_POOL_TAG);
+        }
+        
+        switch (childAddrDesc.ChildDevice.DeviceType)
+        {
+        case DS_DEVICE_TYPE_PS3_DUALSHOCK:
+
+            childAddrDesc.ChildDevice.OutputReportBuffer = ExAllocatePoolWithTag(
+                NonPagedPoolNx,
+                DS3_OUTPUT_REPORT_SIZE,
+                WIRESHOCK_POOL_TAG
+            );
+            RtlCopyMemory(
+                childAddrDesc.ChildDevice.OutputReportBuffer,
+                G_Ds3HidOutputReport,
+                DS3_OUTPUT_REPORT_SIZE
+            );
+
+            break;
+        default:
+            break;
+        }
 
         WireBusSetPdoAddressDescription(Device, Address, &childAddrDesc);
     }
