@@ -30,6 +30,7 @@ SOFTWARE.
 #include <initguid.h>
 
 #include <DsCommon.h>
+#include <km/DsDriver.h>
 #include "WireShock.h"
 #include "ByteArray.h"
 #include "WireBus.h"

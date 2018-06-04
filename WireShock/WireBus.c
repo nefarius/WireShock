@@ -27,7 +27,6 @@ SOFTWARE.
 #define NTSTRSAFE_LIB
 #include <ntstrsafe.h>
 #include <DsHid.h>
-#include <km/DsDriver.h>
 
 
 #ifdef ALLOC_PRAGMA
