@@ -77,5 +77,6 @@ WireShockCreateDevice(
 //
 EVT_WDF_DEVICE_PREPARE_HARDWARE WireShockEvtDevicePrepareHardware;
 EVT_WDF_DEVICE_D0_ENTRY WireShockEvtDeviceD0Entry;
+EVT_WDF_DEVICE_D0_EXIT WireShockEvtDeviceD0Exit;
 
 EXTERN_C_END
