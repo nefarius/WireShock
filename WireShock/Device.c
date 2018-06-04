@@ -389,9 +389,10 @@ NTSTATUS WireShockEvtDeviceD0Exit(
     //
     // Stop pipe readers
     // 
-    WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(pDeviceContext->BulkReadPipe), WdfIoTargetCancelSentIo);
     WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(pDeviceContext->InterruptPipe), WdfIoTargetCancelSentIo);
-    
+    WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(pDeviceContext->BulkReadPipe), WdfIoTargetCancelSentIo);
+    WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(pDeviceContext->BulkWritePipe), WdfIoTargetCancelSentIo);
+        
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit");
 
     return STATUS_SUCCESS;
