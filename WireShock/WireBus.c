@@ -916,13 +916,13 @@ VOID WireBusInitChildOutputReport(WDFDEVICE Device, PBD_ADDR Address)
 
             childAddrDesc.ChildDevice.OutputReportBuffer = ExAllocatePoolWithTag(
                 NonPagedPoolNx,
-                DS3_OUTPUT_REPORT_SIZE,
+                DS3_HID_OUTPUT_REPORT_SIZE,
                 WIRESHOCK_POOL_TAG
             );
             RtlCopyMemory(
                 childAddrDesc.ChildDevice.OutputReportBuffer,
                 G_Ds3HidOutputReport,
-                DS3_OUTPUT_REPORT_SIZE
+                DS3_HID_OUTPUT_REPORT_SIZE
             );
 
             break;
