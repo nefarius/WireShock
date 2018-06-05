@@ -95,7 +95,7 @@ NTSTATUS WriteBulkPipe(
     attribs.ParentObject = request;
 
     status = WdfMemoryCreate(&attribs,
-        NonPagedPool,
+        NonPagedPoolNx,
         WIRESHOCK_POOL_TAG,
         BufferLength,
         &memory,
@@ -121,6 +121,12 @@ NTSTATUS WriteBulkPipe(
             status);
         return status;
     }
+
+    WdfRequestSetCompletionRoutine(
+        request, 
+        EvtUsbRequestCompletionRoutine,
+        NULL
+    );
 
     if (WdfRequestSend(request,
         WdfUsbTargetDeviceGetIoTarget(Context->UsbDevice),

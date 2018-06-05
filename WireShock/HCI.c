@@ -24,7 +24,6 @@ SOFTWARE.
 
 
 #include "Driver.h"
-#include <UsbInterrupt.h>
 
 NTSTATUS
 HCI_Command(
@@ -46,7 +45,7 @@ HCI_Command(
         0,
         Buffer,
         BufferLength,
-        NULL,
+        EvtUsbRequestCompletionRoutine,
         NULL);
 }
 

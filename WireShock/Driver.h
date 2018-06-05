@@ -31,6 +31,7 @@ SOFTWARE.
 
 #include <DsCommon.h>
 #include <km/DsDriver.h>
+#include <UsbInterrupt.h>
 #include "WireShock.h"
 #include "ByteArray.h"
 #include "WireBus.h"

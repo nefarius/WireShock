@@ -535,6 +535,9 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
             REVERSE_BYTE_ARRAY(pGetHostBdAddr->HostAddress.Address, sizeof(BD_ADDR));
 
             break;
+            //
+            // TODO: this should be in SET_FEATURE
+            // 
         case DS_FEATURE_TYPE_SET_HOST_BD_ADDR:
 
             TraceEvents(TRACE_LEVEL_INFORMATION,
