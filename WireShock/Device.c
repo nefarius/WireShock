@@ -29,6 +29,7 @@ SOFTWARE.
 #pragma alloc_text (PAGE, WireShockCreateDevice)
 #pragma alloc_text (PAGE, WireShockEvtDevicePrepareHardware)
 #pragma alloc_text (PAGE, WireShockEvtDeviceD0Entry)
+#pragma alloc_text (PAGE, WireShockEvtDeviceD0Exit)
 #endif
 
 
@@ -82,6 +83,7 @@ Return Value:
     WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&pnpPowerCallbacks);
     pnpPowerCallbacks.EvtDevicePrepareHardware = WireShockEvtDevicePrepareHardware;
     pnpPowerCallbacks.EvtDeviceD0Entry = WireShockEvtDeviceD0Entry;
+    pnpPowerCallbacks.EvtDeviceD0Exit = WireShockEvtDeviceD0Exit;
     WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
 
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&deviceAttributes, DEVICE_CONTEXT);
@@ -359,3 +361,38 @@ End:
     return status;
 }
 
+NTSTATUS WireShockEvtDeviceD0Exit(
+    _In_ WDFDEVICE              Device,
+    _In_ WDF_POWER_DEVICE_STATE TargetState
+)
+{
+    PDEVICE_CONTEXT         pDeviceContext;
+
+    UNREFERENCED_PARAMETER(TargetState);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
+
+    pDeviceContext = DeviceGetContext(Device);
+
+    //
+    // Drop children
+    // 
+    WdfChildListBeginScan(WdfFdoGetDefaultChildList(Device));
+    WdfChildListEndScan(WdfFdoGetDefaultChildList(Device));
+
+    //
+    // Reset host
+    // 
+    HCI_Command_Reset(pDeviceContext);
+    
+    //
+    // Stop pipe readers
+    // 
+    WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(pDeviceContext->InterruptPipe), WdfIoTargetCancelSentIo);
+    WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(pDeviceContext->BulkReadPipe), WdfIoTargetCancelSentIo);
+    WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(pDeviceContext->BulkWritePipe), WdfIoTargetCancelSentIo);
+        
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit");
+
+    return STATUS_SUCCESS;
+}

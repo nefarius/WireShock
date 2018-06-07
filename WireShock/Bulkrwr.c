@@ -95,7 +95,7 @@ NTSTATUS WriteBulkPipe(
     attribs.ParentObject = request;
 
     status = WdfMemoryCreate(&attribs,
-        NonPagedPool,
+        NonPagedPoolNx,
         WIRESHOCK_POOL_TAG,
         BufferLength,
         &memory,
@@ -121,6 +121,12 @@ NTSTATUS WriteBulkPipe(
             status);
         return status;
     }
+
+    WdfRequestSetCompletionRoutine(
+        request, 
+        EvtUsbRequestCompletionRoutine,
+        NULL
+    );
 
     if (WdfRequestSend(request,
         WdfUsbTargetDeviceGetIoTarget(Context->UsbDevice),
@@ -148,7 +154,7 @@ HID_Command(
 )
 {
     NTSTATUS status;
-    PUCHAR buffer = ExAllocatePoolWithTag(NonPagedPool, BufferLength + 8, WIRESHOCK_POOL_TAG);
+    PUCHAR buffer = ExAllocatePoolWithTag(NonPagedPoolNx, BufferLength + 8, WIRESHOCK_POOL_TAG);
 
     buffer[0] = Handle.Lsb;
     buffer[1] = Handle.Msb;
@@ -334,7 +340,7 @@ WireShockEvtUsbBulkReadPipeReadComplete(
     {
         switch (pClientDevice->DeviceType)
         {
-        case DualShock3:
+        case DS_DEVICE_TYPE_PS3_DUALSHOCK:
 
             status = Ds3ProcessHidInputReport(pClientDevice, buffer);
 

@@ -119,6 +119,16 @@ typedef struct _BTH_DEVICE
     // 
     WDFQUEUE HidInputReportQueue;
 
+    //
+    // Timer for re-occurring output reports
+    // 
+    WDFTIMER OutputReportTimer;
+
+    //
+    // HID Output Report Buffer
+    // 
+    PUCHAR OutputReportBuffer;
+
 } BTH_DEVICE, *PBTH_DEVICE;
 
 /**
@@ -271,4 +281,10 @@ WireBusSetChildRemoteName(
     _In_ PBD_ADDR Address,
     _In_ PUCHAR Buffer,
     _In_ ULONG BufferLength
+);
+
+VOID
+WireBusInitChildOutputReport(
+    _In_ WDFDEVICE Device,
+    _In_ PBD_ADDR Address
 );

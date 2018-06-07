@@ -27,6 +27,7 @@ SOFTWARE.
 EVT_WDF_CHILD_LIST_CREATE_DEVICE WireShockEvtWdfChildListCreateDevice;
 EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL WireChildEvtWdfIoQueueIoInternalDeviceControl;
 EVT_WDF_CHILD_LIST_ADDRESS_DESCRIPTION_CLEANUP WireShockEvtWdfChildListAddressDescriptionCleanup;
+EVT_WDF_TIMER WireChildOutputReportEvtTimerFunc;
 
 VOID FORCEINLINE REVERSE_BYTE_ARRAY(PUCHAR start, int size) 
 {

@@ -250,19 +250,10 @@ Ds3ConfigurationResponse(
         Device->IsHidInterruptEstablished = TRUE;
     }
 
-    if (Device->IsHidCommandEstablished)
+    if (Device->IsHidCommandEstablished && Device->IsHidInterruptEstablished)
     {
         BYTE hidCommandEnable[] = {
             0x53, 0xF4, 0x42, 0x03, 0x00, 0x00
-        };
-        BYTE hidOutputReport[] = {
-            0x52, 0x01, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x1E, 0xFF, 0x27, 0x10, 0x00,
-            0x32, 0xFF, 0x27, 0x10, 0x00, 0x32, 0xFF, 0x27,
-            0x10, 0x00, 0x32, 0xFF, 0x27, 0x10, 0x00, 0x32,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00
         };
 
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
@@ -293,8 +284,8 @@ Ds3ConfigurationResponse(
             Context,
             Device->HCI_ConnectionHandle,
             scid,
-            hidOutputReport,
-            _countof(hidOutputReport));
+            (PVOID)G_Ds3HidOutputReport,
+            DS3_HID_OUTPUT_REPORT_SIZE);
 
         if (!NT_SUCCESS(status))
         {
@@ -304,6 +295,11 @@ Ds3ConfigurationResponse(
 
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
             "<< HID_Command OUTPUT REPORT sent");
+
+        WdfTimerStart(
+            Device->OutputReportTimer,
+            WDF_REL_TIMEOUT_IN_MS(DS_ORT_PERIODIC_DUE_TIME)
+        );
     }
 
     return status;

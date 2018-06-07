@@ -35,6 +35,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\common\src\DsDriver.c" />
     <ClCompile Include="..\common\src\DsHid.c" />
     <ClCompile Include="..\common\src\UsbInterrupt.c" />
     <ClCompile Include="Bulkrwr.c" />
@@ -50,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\include\DsHid.h" />
+    <ClInclude Include="..\common\include\km\DsDriver.h" />
     <ClInclude Include="..\common\include\UsbInterrupt.h" />
     <ClInclude Include="Bluetooth.h" />
     <ClInclude Include="Bulkrwr.h" />
