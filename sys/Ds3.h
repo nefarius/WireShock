@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2018 Benjamin "Nefarius" Höglinger
+Copyright (c) 2017 Benjamin "Nefarius" Höglinger
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,30 +22,40 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-EXTERN_C_START
 
-//
-// This is the context that can be placed per queue
-// and would contain per queue information.
-//
-typedef struct _QUEUE_CONTEXT {
+#pragma once
 
-    ULONG PrivateDeviceData;  // just a placeholder
-
-} QUEUE_CONTEXT, *PQUEUE_CONTEXT;
-
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(QUEUE_CONTEXT, QueueGetContext)
 
 NTSTATUS
-WireShockQueueInitialize(
-    _In_ WDFDEVICE Device
-    );
+Ds3ConnectionRequest(
+    PDEVICE_CONTEXT Context,
+    PBTH_DEVICE Device,
+    PUCHAR Buffer,
+    PUCHAR CID);
 
-//
-// Events from the IoQueue object
-//
-EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL WireShockEvtIoDeviceControl;
-EVT_WDF_IO_QUEUE_IO_STOP WireShockEvtIoStop;
-EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL WireShockEvtWdfIoQueueIoInternalDeviceControl;
+NTSTATUS
+Ds3ConnectionResponse(
+    PUCHAR Buffer);
 
-EXTERN_C_END
+NTSTATUS
+Ds3ConfigurationRequest(
+    PDEVICE_CONTEXT Context,
+    PBTH_DEVICE Device,
+    PUCHAR Buffer);
+
+NTSTATUS
+Ds3ConfigurationResponse(
+    PDEVICE_CONTEXT Context,
+    PBTH_DEVICE Device,
+    PUCHAR Buffer);
+
+NTSTATUS
+Ds3DisconnectionRequest(
+    PDEVICE_CONTEXT Context,
+    PBTH_DEVICE Device,
+    PUCHAR Buffer);
+
+NTSTATUS
+Ds3ProcessHidInputReport(
+    PBTH_DEVICE Device,
+    PUCHAR Buffer);

@@ -22,21 +22,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
+EXTERN_C_START
 
-EVT_WDF_CHILD_LIST_CREATE_DEVICE WireShockEvtWdfChildListCreateDevice;
-EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL WireChildEvtWdfIoQueueIoInternalDeviceControl;
-EVT_WDF_CHILD_LIST_ADDRESS_DESCRIPTION_CLEANUP WireShockEvtWdfChildListAddressDescriptionCleanup;
-EVT_WDF_TIMER WireChildOutputReportEvtTimerFunc;
+//
+// This is the context that can be placed per queue
+// and would contain per queue information.
+//
+typedef struct _QUEUE_CONTEXT {
 
-VOID FORCEINLINE REVERSE_BYTE_ARRAY(PUCHAR start, int size) 
-{
-    PUCHAR lo = start;
-    PUCHAR hi = start + size - 1;
-    UCHAR swap;
-    while (lo < hi) {
-        swap = *lo;
-        *lo++ = *hi;
-        *hi-- = swap;
-    }
-}
+    ULONG PrivateDeviceData;  // just a placeholder
+
+} QUEUE_CONTEXT, *PQUEUE_CONTEXT;
+
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(QUEUE_CONTEXT, QueueGetContext)
+
+NTSTATUS
+WireShockQueueInitialize(
+    _In_ WDFDEVICE Device
+    );
+
+//
+// Events from the IoQueue object
+//
+EVT_WDF_IO_QUEUE_IO_STOP WireShockEvtIoStop;
+EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL WireShockEvtWdfIoQueueIoInternalDeviceControl;
+
+EXTERN_C_END

@@ -535,18 +535,6 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
             REVERSE_BYTE_ARRAY(pGetHostBdAddr->HostAddress.Address, sizeof(BD_ADDR));
 
             break;
-            //
-            // TODO: this should be in SET_FEATURE
-            // 
-        case DS_FEATURE_TYPE_SET_HOST_BD_ADDR:
-
-            TraceEvents(TRACE_LEVEL_INFORMATION,
-                TRACE_WIREBUS,
-                ">> >> DS_FEATURE_TYPE_SET_HOST_BD_ADDR");
-
-            status = STATUS_NOT_SUPPORTED;
-
-            break;
         case DS_FEATURE_TYPE_GET_DEVICE_BD_ADDR:
 
             TraceEvents(TRACE_LEVEL_INFORMATION,
@@ -605,6 +593,43 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
         }
 
         WdfRequestSetInformation(Request, packet.reportBufferLen);
+
+        break;
+
+#pragma endregion
+
+#pragma region IOCTL_HID_SET_FEATURE
+
+    case IOCTL_HID_SET_FEATURE:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE,
+            ">> IOCTL_HID_SET_FEATURE");
+
+        status = DsHidRequestGetHidXferPacket_ToWriteToDevice(Request, &packet);
+
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE,
+                "Failed to read feature request (%!STATUS!)",
+                status);
+            break;
+        }
+
+        switch (packet.reportId)
+        {
+        case DS_FEATURE_TYPE_SET_HOST_BD_ADDR:
+
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_QUEUE,
+                ">> >> DS_FEATURE_TYPE_SET_HOST_BD_ADDR");
+
+            status = STATUS_NOT_SUPPORTED;
+
+            break;
+        default:
+            break;
+        }
 
         break;
 

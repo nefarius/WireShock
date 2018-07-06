@@ -55,12 +55,13 @@ Return Value:
 
 --*/
 {
-    WDF_PNPPOWER_EVENT_CALLBACKS pnpPowerCallbacks;
-    WDF_OBJECT_ATTRIBUTES   deviceAttributes;
-    PDEVICE_CONTEXT deviceContext;
-    WDFDEVICE device;
-    NTSTATUS status;
-    WDF_CHILD_LIST_CONFIG childListCfg;
+    WDF_PNPPOWER_EVENT_CALLBACKS    pnpPowerCallbacks;
+    WDF_OBJECT_ATTRIBUTES           deviceAttributes;
+    PDEVICE_CONTEXT                 deviceContext;
+    WDFDEVICE                       device;
+    NTSTATUS                        status;
+    WDF_CHILD_LIST_CONFIG           childListCfg;
+    WDF_DEVICE_PNP_CAPABILITIES     pnpCapabilities;
 
     PAGED_CODE();
 
@@ -90,7 +91,13 @@ Return Value:
 
     status = WdfDeviceCreate(&DeviceInit, &deviceAttributes, &device);
 
-    if (NT_SUCCESS(status)) {
+    if (NT_SUCCESS(status)) 
+    {
+        WDF_DEVICE_PNP_CAPABILITIES_INIT(&pnpCapabilities);
+        pnpCapabilities.Removable = WdfTrue;
+        pnpCapabilities.SurpriseRemovalOK = WdfTrue;
+        WdfDeviceSetPnpCapabilities(device, &pnpCapabilities);
+
         //
         // Get a pointer to the device context structure that we just associated
         // with the device object. We define this structure in the device.h

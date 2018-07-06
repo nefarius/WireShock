@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2017 Benjamin "Nefarius" Höglinger
+Copyright (c) 2018 Benjamin "Nefarius" Höglinger
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,44 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 #pragma once
 
-#define DS3_INIT_HID_STAGE_MAX      0x07
-#define DS3_HID_INPUT_REPORT_SIZE   0x31
-#define DS3_HID_OUTPUT_REPORT_SIZE  0x32
-
-
-NTSTATUS
-Ds3ConnectionRequest(
-    PDEVICE_CONTEXT Context,
-    PBTH_DEVICE Device,
-    PUCHAR Buffer,
-    PUCHAR CID);
-
-NTSTATUS
-Ds3ConnectionResponse(
-    PUCHAR Buffer);
-
-NTSTATUS
-Ds3ConfigurationRequest(
-    PDEVICE_CONTEXT Context,
-    PBTH_DEVICE Device,
-    PUCHAR Buffer);
-
-NTSTATUS
-Ds3ConfigurationResponse(
-    PDEVICE_CONTEXT Context,
-    PBTH_DEVICE Device,
-    PUCHAR Buffer);
-
-NTSTATUS
-Ds3DisconnectionRequest(
-    PDEVICE_CONTEXT Context,
-    PBTH_DEVICE Device,
-    PUCHAR Buffer);
-
-NTSTATUS
-Ds3ProcessHidInputReport(
-    PBTH_DEVICE Device,
-    PUCHAR Buffer);
+EVT_WDF_CHILD_LIST_CREATE_DEVICE WireShockEvtWdfChildListCreateDevice;
+EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL WireChildEvtWdfIoQueueIoInternalDeviceControl;
+EVT_WDF_CHILD_LIST_ADDRESS_DESCRIPTION_CLEANUP WireShockEvtWdfChildListAddressDescriptionCleanup;
+EVT_WDF_TIMER WireChildOutputReportEvtTimerFunc;
