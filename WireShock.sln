@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = ".build", "build\.build.cspr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WireShock", "sys\WireShock.vcxproj", "{4D5E47F6-D7F1-4DFC-947C-DE8A4D8BBFAF}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Driver", "Driver", "{C4E02A10-069B-4ED5-B15E-FE07BC2DA140}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -62,6 +64,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4D5E47F6-D7F1-4DFC-947C-DE8A4D8BBFAF} = {C4E02A10-069B-4ED5-B15E-FE07BC2DA140}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {75B88A09-4D7E-40FD-90A9-97A1321D8A97}
