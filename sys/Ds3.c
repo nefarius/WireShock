@@ -380,6 +380,11 @@ Ds3ProcessHidInputReport(
     PUCHAR      inputBuffer;
     size_t      bufferLength;
 
+    // Shift to begin of report
+    inputBuffer = &Buffer[9];
+
+#pragma region HID Input Report (ID 01) processing
+
     status = WdfIoQueueRetrieveNextRequest(Device->HidInputReportQueue, &Request);
 
     if (NT_SUCCESS(status))
@@ -399,14 +404,42 @@ Ds3ProcessHidInputReport(
             return status;
         }
 
-        // Shift to begin of report
-        inputBuffer = &Buffer[9];
-
         // Convert input to report
-        DS3_RAW_TO_HID_INPUT_REPORT(inputBuffer, outputBuffer);
+        DS3_RAW_TO_HID_INPUT_REPORT_01(inputBuffer, outputBuffer);
 
         WdfRequestCompleteWithInformation(Request, status, bufferLength);
     }
+
+#pragma endregion
+
+#pragma region HID Input Report (ID 02) processing
+
+    status = WdfIoQueueRetrieveNextRequest(Device->HidInputReportQueue, &Request);
+
+    if (NT_SUCCESS(status))
+    {
+        status = WdfRequestRetrieveOutputBuffer(
+            Request,
+            DS3_HID_INPUT_REPORT_SIZE,
+            (PVOID)&outputBuffer,
+            &bufferLength);
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3,
+                "WdfRequestRetrieveOutputBuffer failed with status 0x%X (bufferLength: %d)",
+                status, (ULONG)bufferLength);
+            WdfRequestComplete(Request, status);
+            return status;
+        }
+
+        // Convert input to report
+        DS3_RAW_TO_HID_INPUT_REPORT_02(inputBuffer, outputBuffer);
+
+        WdfRequestCompleteWithInformation(Request, status, bufferLength);
+    }
+
+#pragma endregion
 
     return status;
 }
