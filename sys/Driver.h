@@ -33,7 +33,6 @@ SOFTWARE.
 #include <km/DsDriver.h>
 #include <UsbInterrupt.h>
 #include "WireShock.h"
-#include "ByteArray.h"
 #include "WireBus.h"
 #include "Public.h"
 #include "device.h"
