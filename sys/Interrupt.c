@@ -733,7 +733,7 @@ WireShockEvtUsbInterruptPipeReadComplete(
             default:
                 TraceEvents(TRACE_LEVEL_ERROR,
                     TRACE_INTERRUPT,
-                    "Couldn't determine device type from remote name (%s)",
+                    "Couldn't determine device type from remote name (%c)",
                     buffer[9]
                 );
                 break;
