@@ -63,7 +63,7 @@ Return Value:
     
     //
     // Configure a default queue so that requests that are not
-    // configure-fowarded using WdfDeviceConfigureRequestDispatching to goto
+    // configure-forwarded using WdfDeviceConfigureRequestDispatching to goto
     // other queues get dispatched here.
     //
     WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(
@@ -82,7 +82,10 @@ Return Value:
                  );
 
     if( !NT_SUCCESS(status) ) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate failed %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_QUEUE,
+            "WdfIoQueueCreate failed with status %!STATUS!", 
+            status);
         return status;
     }
 
@@ -110,7 +113,7 @@ Arguments:
 
     ActionFlags - A bitwise OR of one or more WDF_REQUEST_STOP_ACTION_FLAGS-typed flags
                   that identify the reason that the callback function is being called
-                  and whether the request is cancelable.
+                  and whether the request is able to be canceled.
 
 Return Value:
 
