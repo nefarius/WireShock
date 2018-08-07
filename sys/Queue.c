@@ -55,8 +55,8 @@ Return Value:
 
 --*/
 {
-    WDFQUEUE queue;
-    NTSTATUS status;
+    WDFQUEUE               queue;
+    NTSTATUS               status;
     WDF_IO_QUEUE_CONFIG    queueConfig;
 
     PAGED_CODE();
