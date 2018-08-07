@@ -6,7 +6,7 @@ Module Name:
 
 Abstract:
 
-    Header file for the debug tracing related function defintions and macros.
+    Header file for the debug tracing related function definitions and macros.
 
 Environment:
 
