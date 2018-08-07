@@ -39,7 +39,6 @@
     <ClCompile Include="..\common\src\DsHid.c" />
     <ClCompile Include="..\common\src\UsbInterrupt.c" />
     <ClCompile Include="Bulkrwr.c" />
-    <ClCompile Include="ByteArray.c" />
     <ClCompile Include="Device.c" />
     <ClCompile Include="Driver.c" />
     <ClCompile Include="Ds3.c" />
@@ -55,7 +54,6 @@
     <ClInclude Include="..\common\include\UsbInterrupt.h" />
     <ClInclude Include="Bluetooth.h" />
     <ClInclude Include="Bulkrwr.h" />
-    <ClInclude Include="ByteArray.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="Driver.h" />
     <ClInclude Include="Ds3.h" />
