@@ -141,7 +141,7 @@ WireShockEvtDevicePrepareHardware(
 Routine Description:
 
     In this callback, the driver does whatever is necessary to make the
-    hardware ready to use.  In the case of a USB device, this involves
+    hardware ready to use. In the case of a USB device, this involves
     reading and selecting descriptors.
 
 Arguments:
@@ -177,9 +177,9 @@ Return Value:
     // underlying USB stack. The WDFUSBDEVICE handle is used to query,
     // configure, and manage all aspects of the USB device.
     // These aspects include device properties, bus properties,
-    // and I/O creation and synchronization. We only create the device the first time
+    // I/O creation and synchronization. We only create the device the first time
     // PrepareHardware is called. If the device is restarted by pnp manager
-    // for resource rebalance, we will use the same device handle but then select
+    // to balance out resources, we will use the same device handle but then select
     // the interfaces again because the USB stack could reconfigure the device on
     // restart.
     //
@@ -269,7 +269,7 @@ Return Value:
     }
 
     //
-    // If we didn't find all the 3 pipes, fail the start.
+    // If we didn't find all 3 pipes, fail to start.
     //
     if (!(pDeviceContext->BulkWritePipe
         && pDeviceContext->BulkReadPipe && pDeviceContext->InterruptPipe)) {
@@ -324,7 +324,7 @@ WireShockEvtDeviceD0Entry(
     UNREFERENCED_PARAMETER(PreviousState);
 
     //
-    // Since continuous reader is configured for this interrupt-pipe, we must explicitly start
+    // Since the continuous reader is configured for this interrupt-pipe, we must explicitly start
     // the I/O target to get the framework to post read requests.
     //
     status = WdfIoTargetStart(WdfUsbTargetPipeGetIoTarget(pDeviceContext->InterruptPipe));
@@ -351,8 +351,8 @@ End:
 
     if (!NT_SUCCESS(status)) {
         //
-        // Failure in D0Entry will lead to device being removed. So let us stop the continuous
-        // reader in preparation for the ensuing remove.
+        // Failure in D0Entry will lead to the device being removed. So let us stop the continuous
+        // reader in preparation for the ensuing removal.
         //
         if (isTargetStarted) {
             WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(pDeviceContext->InterruptPipe), WdfIoTargetCancelSentIo);

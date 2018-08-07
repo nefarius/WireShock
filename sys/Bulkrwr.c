@@ -48,16 +48,17 @@ WireShockConfigContReaderForBulkReadEndPoint(
 
     //
     // Reader requests are not posted to the target automatically.
-    // Driver must explictly call WdfIoTargetStart to kick start the
-    // reader.  In this sample, it's done in D0Entry.
-    // By defaut, framework queues two requests to the target
+    // Driver must explicitly call WdfIoTargetStart to kick start the
+    // reader. In this sample, it's done in D0Entry.
+    // By default, framework queues two requests to the target
     // endpoint. Driver can configure up to 10 requests with CONFIG macro.
     //
     status = WdfUsbTargetPipeConfigContinuousReader(pDeviceCtx->BulkReadPipe,
         &contReaderConfig);
 
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BULKRWR,
             "WdfUsbTargetPipeConfigContinuousReader failed with status %!STATUS!",
             status);
         return status;
@@ -85,7 +86,8 @@ NTSTATUS WriteBulkPipe(
         WdfUsbTargetDeviceGetIoTarget(Context->UsbDevice),
         &request);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BULKRWR,
             "WdfRequestCreate failed with status %!STATUS!",
             status);
         return status;
@@ -101,7 +103,8 @@ NTSTATUS WriteBulkPipe(
         &memory,
         &writeBufferPointer);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BULKRWR,
             "WdfMemoryCreate failed with status %!STATUS!",
             status);
         return status;
@@ -116,7 +119,8 @@ NTSTATUS WriteBulkPipe(
         NULL
     );
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BULKRWR,
             "WdfUsbTargetPipeFormatRequestForWrite failed with status %!STATUS!",
             status);
         return status;
@@ -136,7 +140,8 @@ NTSTATUS WriteBulkPipe(
     }
 
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BULKRWR,
             "WdfRequestSend failed with status %!STATUS!",
             status);
     }
@@ -197,9 +202,9 @@ WireShockEvtUsbBulkReadPipeReadComplete(
     UNREFERENCED_PARAMETER(Pipe);
 
     if (NumBytesTransferred == 0) {
-        TraceEvents(TRACE_LEVEL_WARNING, TRACE_BULKRWR,
-            "!FUNC! Zero length read "
-            "occurred on the Interrupt Pipe's Continuous Reader\n"
+        TraceEvents(TRACE_LEVEL_WARNING,
+            TRACE_BULKRWR,
+            "!FUNC! Zero length read occurred on the Interrupt Pipe's Continuous Reader"
         );
         return;
     }
@@ -214,7 +219,8 @@ WireShockEvtUsbBulkReadPipeReadComplete(
     // Fetch child device matching connection handle
     // 
     if (!WireBusGetPdoAddressDescriptionByHandle(device, &clientHandle, &addrDesc, &clientAddr)) {
-        TraceEvents(TRACE_LEVEL_WARNING, TRACE_BULKRWR,
+        TraceEvents(TRACE_LEVEL_WARNING,
+            TRACE_BULKRWR,
             "WireBusGetPdoAddressDescriptionByHandle failed for %02X %02X",
             clientHandle.Lsb, clientHandle.Msb
         );
@@ -225,7 +231,9 @@ WireShockEvtUsbBulkReadPipeReadComplete(
 
     if (pClientDevice == NULL)
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "PBTH_DEVICE not found");
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BULKRWR,
+            "PBTH_DEVICE not found");
         return;
     }
 
@@ -239,6 +247,7 @@ WireShockEvtUsbBulkReadPipeReadComplete(
             {
             case L2CAP_Command_Reject:
             {
+                //TODO: Find a better solution to a case init
                 PL2CAP_SIGNALLING_COMMAND_REJECT data = (PL2CAP_SIGNALLING_COMMAND_REJECT)&buffer[8];
 
                 TraceEvents(TRACE_LEVEL_WARNING, 
