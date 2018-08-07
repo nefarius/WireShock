@@ -36,11 +36,9 @@ WireShockConfigContReaderForInterruptEndPoint(
 {
     WDF_USB_CONTINUOUS_READER_CONFIG contReaderConfig;
     NTSTATUS status;
-    PDEVICE_CONTEXT pDeviceContext;
+    PDEVICE_CONTEXT pDeviceContext = DeviceGetContext(Device);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "%!FUNC! Entry");
-
-    pDeviceContext = DeviceGetContext(Device);
 
     WDF_USB_CONTINUOUS_READER_CONFIG_INIT(&contReaderConfig,
         WireShockEvtUsbInterruptPipeReadComplete,
@@ -51,16 +49,17 @@ WireShockConfigContReaderForInterruptEndPoint(
 
     //
     // Reader requests are not posted to the target automatically.
-    // Driver must explictly call WdfIoTargetStart to kick start the
+    // Driver must explicitly call WdfIoTargetStart to kick start the
     // reader.  In this sample, it's done in D0Entry.
-    // By defaut, framework queues two requests to the target
+    // By default, framework queues two requests to the target
     // endpoint. Driver can configure up to 10 requests with CONFIG macro.
     //
     status = WdfUsbTargetPipeConfigContinuousReader(pDeviceContext->InterruptPipe,
         &contReaderConfig);
 
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_INTERRUPT,
             "WdfUsbTargetPipeConfigContinuousReader failed with status %!STATUS!",
             status);
         return status;
@@ -94,9 +93,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
 
     if (NumBytesTransferred == 0) {
-        TraceEvents(TRACE_LEVEL_WARNING, TRACE_INTERRUPT,
-            "!FUNC! Zero length read "
-            "occurred on the Interrupt Pipe's Continuous Reader\n"
+        TraceEvents(TRACE_LEVEL_WARNING,
+            TRACE_INTERRUPT,
+            "!FUNC! Zero length read occurred on the Interrupt Pipe's Continuous Reader"
         );
         return;
     }
@@ -127,8 +126,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
                 pDeviceContext->DisableSSP = TRUE;
 
-                TraceEvents(TRACE_LEVEL_WARNING, TRACE_INTERRUPT,
-                    "-- Simple Pairing not supported on this device. [SSP Disabled]");
+                TraceEvents(TRACE_LEVEL_WARNING,
+                    TRACE_INTERRUPT,
+                    "-- Simple Pairing is not supported on this device. [SSP Disabled]");
 
                 status = HCI_Command_Write_Scan_Enable(pDeviceContext);
                 break;
@@ -149,11 +149,15 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
     case HCI_Command_Complete_EV:
 
-        TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_INTERRUPT, "HCI_Command_Complete_EV");
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_INTERRUPT,
+            "HCI_Command_Complete_EV");
 
         if (command == HCI_Reset && HCI_COMMAND_SUCCESS(buffer) && !pDeviceContext->Started)
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Reset SUCCESS");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Reset SUCCESS");
 
             //
             // By this time the host controller should have dropped all
@@ -172,7 +176,8 @@ WireShockEvtUsbInterruptPipeReadComplete(
         {
             RtlCopyMemory(&pDeviceContext->BluetoothHostAddress, &buffer[6], sizeof(BD_ADDR));
 
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
                 "HCI_Read_BD_ADDR SUCCESS: %02X:%02X:%02X:%02X:%02X:%02X",
                 pDeviceContext->BluetoothHostAddress.Address[0],
                 pDeviceContext->BluetoothHostAddress.Address[1],
@@ -186,14 +191,18 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
         if (command == HCI_Read_Buffer_Size && HCI_COMMAND_SUCCESS(buffer))
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Read_Buffer_Size SUCCESS");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Read_Buffer_Size SUCCESS");
 
             status = HCI_Command_Read_Local_Version_Info(pDeviceContext);
         }
 
         if (command == HCI_Read_Local_Version_Info && HCI_COMMAND_SUCCESS(buffer))
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Read_Local_Version_Info SUCCESS");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Read_Local_Version_Info SUCCESS");
 
             pDeviceContext->HciVersionMajor = buffer[6];
             pDeviceContext->LmpVersionMajor = buffer[9];
@@ -207,30 +216,34 @@ WireShockEvtUsbInterruptPipeReadComplete(
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth® Core Specification 1.0b");
                 break;
             case 1:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 1.1");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth® Core Specification 1.1");
                 break;
             case 2:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 1.2");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth® Core Specification 1.2");
                 break;
             case 3:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 2.0 + EDR");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth® Core Specification 2.0 + EDR");
                 break;
             case 4:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 2.1 + EDR");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth® Core Specification 2.1 + EDR");
                 break;
             case 5:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 3.0 + HS");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth® Core Specification 3.0 + HS");
                 break;
             case 6:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 4.0");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth® Core Specification 4.0");
                 break;
             case 7:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 4.1");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth® Core Specification 4.1");
                 break;
             case 8:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 4.2");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth® Core Specification 4.2");
                 break;
+                //TODO: ADD BT 5.0
             default:
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_INTERRUPT,
+                    "Unknown Bluetooth® Specification HCI_Version");
                 break;
             }
 
@@ -243,52 +256,59 @@ WireShockEvtUsbInterruptPipeReadComplete(
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth® Core Specification 1.0b");
                 break;
             case 1:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 1.1");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth® Core Specification 1.1");
                 break;
             case 2:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 1.2");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth® Core Specification 1.2");
                 break;
             case 3:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 2.0 + EDR");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth® Core Specification 2.0 + EDR");
                 break;
             case 4:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 2.1 + EDR");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth® Core Specification 2.1 + EDR");
                 break;
             case 5:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 3.0 + HS");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth® Core Specification 3.0 + HS");
                 break;
             case 6:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 4.0");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth® Core Specification 4.0");
                 break;
             case 7:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 4.1");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth® Core Specification 4.1");
                 break;
             case 8:
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 4.2");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth® Core Specification 4.2");
                 break;
+                //TODO: ADD BT 5.0
             default:
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_INTERRUPT,
+                    "Unknown Bluetooth® Specification LMP_Version");
                 break;
             }
 
             // Bluetooth v2.0 + EDR
             if (pDeviceContext->HciVersionMajor >= 3 && pDeviceContext->LmpVersionMajor >= 3)
             {
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
-                    "Bluetooth host supports communication with DualShock 3 controllers");
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_INTERRUPT,
+                    "Bluetooth® host supports communication with DualShock 3 controllers");
             }
 
             // Bluetooth v2.1 + EDR
             if (pDeviceContext->HciVersionMajor >= 4 && pDeviceContext->LmpVersionMajor >= 4)
             {
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
-                    "Bluetooth host supports communication with DualShock 4 controllers");
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_INTERRUPT,
+                    "Bluetooth® host supports communication with DualShock 4 controllers");
             }
 
             // dongle effectively too old/unsupported 
             if (pDeviceContext->HciVersionMajor < 3 || pDeviceContext->LmpVersionMajor < 3)
             {
-                TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
-                    "Unsupported Bluetooth Specification, aborting communication");
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_INTERRUPT,
+                    "Unsupported Bluetooth® Specification, aborting communication");
                 status = HCI_Command_Reset(pDeviceContext);
 
                 if (NT_SUCCESS(status))
@@ -311,7 +331,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
         if (command == HCI_Write_Simple_Pairing_Mode)
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Simple_Pairing_Mode");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Write_Simple_Pairing_Mode");
 
             if (HCI_COMMAND_SUCCESS(buffer))
             {
@@ -321,8 +343,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
             {
                 pDeviceContext->DisableSSP = TRUE;
 
-                TraceEvents(TRACE_LEVEL_WARNING, TRACE_INTERRUPT,
-                    "-- Simple Pairing not supported on this device. [SSP Disabled]");
+                TraceEvents(TRACE_LEVEL_WARNING,
+                    TRACE_INTERRUPT,
+                    "-- Simple Pairing is not supported on this device. [SSP Disabled]");
 
                 status = HCI_Command_Write_Scan_Enable(pDeviceContext);
             }
@@ -330,14 +353,18 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
         if (command == HCI_Write_Simple_Pairing_Debug_Mode)
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Simple_Pairing_Debug_Mode");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Write_Simple_Pairing_Debug_Mode");
 
             status = HCI_Command_Write_Authentication_Enable(pDeviceContext);
         }
 
         if (command == HCI_Write_Authentication_Enable)
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Authentication_Enable");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Write_Authentication_Enable");
 
             if (HCI_COMMAND_SUCCESS(buffer))
             {
@@ -347,8 +374,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
             {
                 pDeviceContext->DisableSSP = TRUE;
 
-                TraceEvents(TRACE_LEVEL_WARNING, TRACE_INTERRUPT,
-                    "-- Simple Pairing not supported on this device. [SSP Disabled]");
+                TraceEvents(TRACE_LEVEL_WARNING,
+                    TRACE_INTERRUPT,
+                    "-- Simple Pairing is not supported on this device. [SSP Disabled]");
 
                 status = HCI_Command_Write_Scan_Enable(pDeviceContext);
             }
@@ -356,7 +384,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
         if (command == HCI_Set_Event_Mask)
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Set_Event_Mask");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Set_Event_Mask");
 
             if (HCI_COMMAND_SUCCESS(buffer))
             {
@@ -366,8 +396,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
             {
                 pDeviceContext->DisableSSP = TRUE;
 
-                TraceEvents(TRACE_LEVEL_WARNING, TRACE_INTERRUPT,
-                    "-- Simple Pairing not supported on this device. [SSP Disabled]");
+                TraceEvents(TRACE_LEVEL_WARNING,
+                    TRACE_INTERRUPT,
+                    "-- Simple Pairing is not supported on this device. [SSP Disabled]");
 
                 status = HCI_Command_Write_Scan_Enable(pDeviceContext);
             }
@@ -375,70 +406,90 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
         if (command == HCI_Write_Page_Timeout && HCI_COMMAND_SUCCESS(buffer))
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Page_Timeout");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Write_Page_Timeout");
 
             status = HCI_Command_Write_Page_Scan_Activity(pDeviceContext);
         }
 
         if (command == HCI_Write_Page_Scan_Activity && HCI_COMMAND_SUCCESS(buffer))
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Page_Scan_Activity");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Write_Page_Scan_Activity");
 
             status = HCI_Command_Write_Page_Scan_Type(pDeviceContext);
         }
 
         if (command == HCI_Write_Page_Scan_Type && HCI_COMMAND_SUCCESS(buffer))
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Page_Scan_Type");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Write_Page_Scan_Type");
 
             status = HCI_Command_Write_Inquiry_Scan_Activity(pDeviceContext);
         }
 
         if (command == HCI_Write_Inquiry_Scan_Activity && HCI_COMMAND_SUCCESS(buffer))
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Inquiry_Scan_Activity");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Write_Inquiry_Scan_Activity");
 
             status = HCI_Command_Write_Inquiry_Scan_Type(pDeviceContext);
         }
 
         if (command == HCI_Write_Inquiry_Scan_Type && HCI_COMMAND_SUCCESS(buffer))
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Inquiry_Scan_Type");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Write_Inquiry_Scan_Type");
 
             status = HCI_Command_Write_Inquiry_Mode(pDeviceContext);
         }
 
         if (command == HCI_Write_Inquiry_Mode && HCI_COMMAND_SUCCESS(buffer))
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Inquiry_Mode");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Write_Inquiry_Mode");
 
             status = HCI_Command_Write_Class_of_Device(pDeviceContext);
         }
 
         if (command == HCI_Write_Class_of_Device && HCI_COMMAND_SUCCESS(buffer))
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Class_of_Device");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Write_Class_of_Device");
 
             status = HCI_Command_Write_Extended_Inquiry_Response(pDeviceContext);
         }
 
         if (command == HCI_Write_Extended_Inquiry_Response && HCI_COMMAND_SUCCESS(buffer))
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Extended_Inquiry_Response");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Write_Extended_Inquiry_Response");
 
             status = HCI_Command_Write_Local_Name(pDeviceContext);
         }
 
         if (command == HCI_Write_Local_Name && HCI_COMMAND_SUCCESS(buffer))
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Local_Name");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Write_Local_Name");
 
             status = HCI_Command_Write_Scan_Enable(pDeviceContext);
         }
 
         if (command == HCI_Write_Scan_Enable && HCI_COMMAND_SUCCESS(buffer))
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Scan_Enable");
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Write_Scan_Enable");
 
             pDeviceContext->Initialized = TRUE;
         }
@@ -451,8 +502,10 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
     case HCI_Connection_Request_EV:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
-            "HCI_Connection_Request_EV %d", (ULONG)NumBytesTransferred);
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_INTERRUPT,
+            "HCI_Connection_Request_EV %d",
+            (ULONG)NumBytesTransferred);
 
         BD_ADDR_FROM_BUFFER(clientAddr, &buffer[2]);
 
@@ -523,16 +576,18 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
     case HCI_Connection_Complete_EV:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Connection_Complete_EV");
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_INTERRUPT,
+            "HCI_Connection_Complete_EV");
 
         if (buffer[2] == 0x00)
         {
             clientHandle.Lsb = buffer[3];
             clientHandle.Msb = buffer[4] | 0x20;
 
-            TraceEvents(TRACE_LEVEL_INFORMATION, 
-                TRACE_INTERRUPT, 
-                "!! LSB/MSB: %02X %02X", 
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "!! LSB/MSB: %02X %02X",
                 clientHandle.Lsb, clientHandle.Msb);
 
             BD_ADDR_FROM_BUFFER(clientAddr, &buffer[5]);
@@ -543,8 +598,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
         }
         else
         {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT, 
-                "HCI_Connection_Complete_EV failed: %s", 
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_INTERRUPT,
+                "HCI_Connection_Complete_EV failed: %s",
                 HCI_ERROR_DETAIL(buffer[2]));
         }
 
@@ -556,18 +612,22 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
     case HCI_Disconnection_Complete_EV:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Disconnection_Complete_EV");
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_INTERRUPT,
+            "HCI_Disconnection_Complete_EV");
 
         if (buffer[2] == 0x00)
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Disconnection_Complete_EV SUCCESS");
-            
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Disconnection_Complete_EV SUCCESS");
+
             clientHandle.Lsb = buffer[3];
             clientHandle.Msb = buffer[4] | 0x20;
 
-            TraceEvents(TRACE_LEVEL_INFORMATION, 
-                TRACE_INTERRUPT, 
-                "!! LSB/MSB: %02X %02X", 
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "!! LSB/MSB: %02X %02X",
                 clientHandle.Lsb, clientHandle.Msb);
 
             PDO_IDENTIFICATION_DESCRIPTION desc;
@@ -600,6 +660,10 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
     case HCI_Number_Of_Completed_Packets_EV:
 
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_INTERRUPT,
+            "HCI_Number_Of_Completed_Packets_EV, Not Implemeted");
+
         break;
 
 #pragma endregion 
@@ -608,7 +672,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
     case HCI_Remote_Name_Request_Complete_EV:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Remote_Name_Request_Complete_EV");
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_INTERRUPT,
+            "HCI_Remote_Name_Request_Complete_EV");
 
         if (buffer[2] == 0x00)
         {
@@ -665,9 +731,10 @@ WireShockEvtUsbInterruptPipeReadComplete(
                 );
                 break;
             default:
-                TraceEvents(TRACE_LEVEL_ERROR, 
-                    TRACE_INTERRUPT, 
-                    "Couldn't determine device type from remote name"
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_INTERRUPT,
+                    "Couldn't determine device type from remote name (%s)",
+                    buffer[9]
                 );
                 break;
             }
@@ -686,7 +753,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
     case HCI_Link_Key_Request_EV:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Link_Key_Request_EV");
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_INTERRUPT,
+            "HCI_Link_Key_Request_EV, Not Implemented");
 
         break;
 
@@ -696,7 +765,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
     case HCI_PIN_Code_Request_EV:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_PIN_Code_Request_EV");
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_INTERRUPT,
+            "HCI_PIN_Code_Request_EV, Not Implemented");
 
         break;
 
@@ -706,7 +777,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
     case HCI_IO_Capability_Request_EV:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_IO_Capability_Request_EV");
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_INTERRUPT,
+            "HCI_IO_Capability_Request_EV, Not Implemented");
 
         break;
 
@@ -716,7 +789,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
     case HCI_User_Confirmation_Request_EV:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_User_Confirmation_Request_EV");
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_INTERRUPT,
+            "HCI_User_Confirmation_Request_EV, Not Implemented");
 
         break;
 
@@ -726,12 +801,20 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
     case HCI_Link_Key_Notification_EV:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Link_Key_Notification_EV");
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_INTERRUPT,
+            "HCI_Link_Key_Notification_EV, Not Implemented");
 
         break;
 
 #pragma endregion
     default:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_INTERRUPT,
+            "%!FUNC!: Unknown Event (%d) recieved, Default case triggered",
+            event);
+
         break;
     }
 }
