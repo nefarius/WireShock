@@ -700,11 +700,11 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
     case IOCTL_HID_SEND_IDLE_NOTIFICATION_REQUEST:  // METHOD_NEITHER
                                                     //
                                                     // This has the USBSS Idle notification callback. If the lower driver
-                                                    // can handle it (e.g. USB stack can handle it) then pass it down
-                                                    // otherwise complete it here as not inplemented. For a virtual
+                                                    // can handle it (e.g. USB stack can handle it) then pass it down,
+                                                    // otherwise complete it here as not implemented. For a virtual
                                                     // device, idling is not needed.
                                                     //
-                                                    // Not implemented. fall through...
+                                                    // Not implemented. Fall through...
                                                     //
     case IOCTL_HID_ACTIVATE_DEVICE:                 // METHOD_NEITHER
     case IOCTL_HID_DEACTIVATE_DEVICE:               // METHOD_NEITHER
@@ -712,7 +712,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
                                                     //
                                                     // We don't do anything for these IOCTLs but some minidrivers might.
                                                     //
-                                                    // Not implemented. fall through...
+                                                    // Not implemented. Fall through...
                                                     //
     default:
         TraceEvents(TRACE_LEVEL_WARNING,
