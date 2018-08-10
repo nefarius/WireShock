@@ -127,7 +127,7 @@ NTSTATUS WriteBulkPipe(
     }
 
     WdfRequestSetCompletionRoutine(
-        request, 
+        request,
         EvtUsbRequestCompletionRoutine,
         NULL
     );
@@ -159,7 +159,11 @@ HID_Command(
 )
 {
     NTSTATUS status;
-    PUCHAR buffer = ExAllocatePoolWithTag(NonPagedPoolNx, BufferLength + 8, WIRESHOCK_POOL_TAG);
+    PUCHAR buffer;
+
+    buffer = ExAllocatePoolWithTag(NonPagedPoolNx,
+        BufferLength + 8,
+        WIRESHOCK_POOL_TAG);
 
     buffer[0] = Handle.Lsb;
     buffer[1] = Handle.Msb;
@@ -248,11 +252,13 @@ WireShockEvtUsbBulkReadPipeReadComplete(
             case L2CAP_Command_Reject:
             {
                 //TODO: Find a better solution to a case init
-                PL2CAP_SIGNALLING_COMMAND_REJECT data = (PL2CAP_SIGNALLING_COMMAND_REJECT)&buffer[8];
+                PL2CAP_SIGNALLING_COMMAND_REJECT data;
 
-                TraceEvents(TRACE_LEVEL_WARNING, 
-                    TRACE_BULKRWR, 
-                    ">> L2CAP_Command_Reject: 0x%04X", 
+                data = (PL2CAP_SIGNALLING_COMMAND_REJECT)&buffer[8];
+
+                TraceEvents(TRACE_LEVEL_WARNING,
+                    TRACE_BULKRWR,
+                    ">> L2CAP_Command_Reject: 0x%04X",
                     data->Reason);
 
                 break;
@@ -328,8 +334,8 @@ WireShockEvtUsbBulkReadPipeReadComplete(
 
             case L2CAP_Disconnection_Response:
 
-                TraceEvents(TRACE_LEVEL_WARNING, 
-                    TRACE_BULKRWR, 
+                TraceEvents(TRACE_LEVEL_WARNING,
+                    TRACE_BULKRWR,
                     ">> L2CAP_Disconnection_Response");
 
                 break;
@@ -337,9 +343,9 @@ WireShockEvtUsbBulkReadPipeReadComplete(
 #pragma endregion
 
             default:
-                TraceEvents(TRACE_LEVEL_WARNING, 
-                    TRACE_BULKRWR, 
-                    "Unknown L2CAP command: 0x%02X", 
+                TraceEvents(TRACE_LEVEL_WARNING,
+                    TRACE_BULKRWR,
+                    "Unknown L2CAP command: 0x%02X",
                     code);
                 break;
             }
@@ -356,9 +362,9 @@ WireShockEvtUsbBulkReadPipeReadComplete(
             break;
         default:
 
-            TraceEvents(TRACE_LEVEL_WARNING, 
-                TRACE_BULKRWR, 
-                "Unknown DS_DEVICE_TYPE: 0x%02X", 
+            TraceEvents(TRACE_LEVEL_WARNING,
+                TRACE_BULKRWR,
+                "Unknown DS_DEVICE_TYPE: 0x%02X",
                 pClientDevice->DeviceType);
 
             break;
