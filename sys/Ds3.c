@@ -408,12 +408,20 @@ Ds3ProcessHidInputReport(
         {
         case DS_HID_DEVICE_MODE_MULTI:
 
-            DS3_RAW_TO_SPLIT_HID_INPUT_REPORT_01(inputBuffer, outputBuffer);
+            DS3_RAW_TO_SPLIT_HID_INPUT_REPORT_01(
+                inputBuffer, 
+                outputBuffer, 
+                Device->Configuration.MuteDigitalPressureButtons
+            );
 
             break;
         case DS_HID_DEVICE_MODE_SINGLE:
 
-            DS3_RAW_TO_SINGLE_HID_INPUT_REPORT(inputBuffer, outputBuffer);
+            DS3_RAW_TO_SINGLE_HID_INPUT_REPORT(
+                inputBuffer, 
+                outputBuffer,
+                Device->Configuration.MuteDigitalPressureButtons
+            );
 
             break;
         default:
