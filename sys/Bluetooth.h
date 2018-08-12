@@ -129,6 +129,11 @@ typedef struct _BTH_DEVICE
     // 
     PUCHAR OutputReportBuffer;
 
+    //
+    // Device driver configuration
+    // 
+    DS_DRIVER_CONFIGURATION Configuration;
+
 } BTH_DEVICE, *PBTH_DEVICE;
 
 /**

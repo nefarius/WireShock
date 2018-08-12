@@ -351,8 +351,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
 
     NTSTATUS                            status = STATUS_SUCCESS;
     size_t                              bytesToCopy = 0;
-    WDFMEMORY                           memory;
-    WDFDEVICE                           device = WdfIoQueueGetDevice(WdfRequestGetIoQueue(Request));
+    WDFDEVICE                           device;
     PDO_ADDRESS_DESCRIPTION             addrDesc;
     HID_XFER_PACKET                     packet;
     PDS_FEATURE_GET_HOST_BD_ADDR        pGetHostBdAddr;
@@ -365,35 +364,42 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry (IoControlCode: 0x%X)", IoControlCode);
 
+    device = WdfIoQueueGetDevice(WdfRequestGetIoQueue(Request));
+    pParentCtx = DeviceGetContext(WdfPdoGetParent(device));
+
+    WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(&addrDesc.Header, sizeof(addrDesc));
+
+    //
+    // This should always succeed anyways so put it before switch statement.
+    // It's called per input report request so no negative performance
+    // is expected. Always expect the unexpected, though =]
+    // 
+    status = WdfPdoRetrieveAddressDescription(device, &addrDesc.Header);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_WIREBUS,
+            "WdfPdoRetrieveAddressDescription failed with status %!STATUS!",
+            status);
+        WdfRequestComplete(Request, status);
+        return;
+    }
+
     switch (IoControlCode)
     {
 #pragma region IOCTL_HID_GET_DEVICE_DESCRIPTOR
 
     case IOCTL_HID_GET_DEVICE_DESCRIPTOR:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_WIREBUS,
-            ">> IOCTL_HID_GET_DEVICE_DESCRIPTOR");
+        status = DsHidGetDeviceDescriptor(
+            Request,
+            addrDesc.ChildDevice.Configuration.HidDeviceMode,
+            &bytesToCopy
+        );
 
-        status = WdfRequestRetrieveOutputMemory(Request, &memory);
         if (!NT_SUCCESS(status)) {
             TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_WIREBUS,
-                "WdfRequestRetrieveOutputMemory failed with status %!STATUS!",
-                status);
-            break;
-        }
-
-        bytesToCopy = G_Ds3HidDescriptor.bLength;
-
-        status = WdfMemoryCopyFromBuffer(memory,
-            0, // Offset
-            (PVOID)&G_Ds3HidDescriptor,
-            bytesToCopy);
-        if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_WIREBUS,
-                "WdfMemoryCopyFromBuffer failed with status %!STATUS!",
+                "DsHidGetDeviceDescriptor failed with status %!STATUS!",
                 status);
             break;
         }
@@ -411,41 +417,16 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
 
     case IOCTL_HID_GET_REPORT_DESCRIPTOR:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_WIREBUS,
-            ">> IOCTL_HID_GET_REPORT_DESCRIPTOR");
+        status = DsHidGetReportDescriptor(
+            Request,
+            addrDesc.ChildDevice.Configuration.HidDeviceMode,
+            &bytesToCopy
+        );
 
-        status = WdfRequestRetrieveOutputMemory(Request, &memory);
         if (!NT_SUCCESS(status)) {
             TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_WIREBUS,
-                "WdfRequestRetrieveOutputMemory failed with status %!STATUS!",
-                status);
-            break;
-        }
-
-        //
-        // Use hardcoded Report descriptor
-        //
-        bytesToCopy = G_Ds3HidDescriptor.DescriptorList[0].wReportLength;
-
-        if (bytesToCopy == 0) {
-            status = STATUS_INVALID_DEVICE_STATE;
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_WIREBUS,
-                "G_DefaultHidDescriptor's reportLength is zero, %!STATUS!",
-                status);
-            break;
-        }
-
-        status = WdfMemoryCopyFromBuffer(memory,
-            0,
-            (PVOID)G_Ds3HidReportDescriptor,
-            bytesToCopy);
-        if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_WIREBUS,
-                "WdfMemoryCopyFromBuffer failed with status %!STATUS!",
+                "DsHidGetReportDescriptor failed with status %!STATUS!",
                 status);
             break;
         }
@@ -483,18 +464,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
         TraceEvents(TRACE_LEVEL_INFORMATION,
             TRACE_WIREBUS,
             ">> IOCTL_HID_READ_REPORT");
-
-        WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(&addrDesc.Header, sizeof(addrDesc));
-
-        status = WdfPdoRetrieveAddressDescription(device, &addrDesc.Header);
-        if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_WIREBUS,
-                "WdfPdoRetrieveAddressDescription failed with status %!STATUS!",
-                status);
-            break;
-        }
-
+        
         status = WdfRequestForwardToIoQueue(Request, addrDesc.ChildDevice.HidInputReportQueue);
         if (!NT_SUCCESS(status)) {
             TraceEvents(TRACE_LEVEL_ERROR,
