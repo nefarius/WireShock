@@ -91,7 +91,6 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
     UNREFERENCED_PARAMETER(Pipe);
 
-
     if (NumBytesTransferred == 0) {
         TraceEvents(TRACE_LEVEL_WARNING,
             TRACE_INTERRUPT,
@@ -133,13 +132,21 @@ WireShockEvtUsbInterruptPipeReadComplete(
                 status = HCI_Command_Write_Scan_Enable(pDeviceContext);
                 break;
             default:
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_INTERRUPT,
+                    "HCI_Command_Status_EV Unknown command %d, Default case triggered",
+                    command);
                 break;
             }
         }
         break;
-    case HCI_Number_Of_Completed_Packets_EV:
+    case HCI_Number_Of_Completed_Packets_EV: //TODO
         break;
     default:
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_INTERRUPT,
+            "%!FUNC! Unknown event %d, Default case triggered",
+            event);
         break;
     }
 
@@ -239,7 +246,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
             case 8:
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth® Core Specification 4.2");
                 break;
-                //TODO: ADD BT 5.0
+            case 9:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth® Core Specification 5.0"); //TODO: CHECK/ADD BT 5.0 support
+                break;
             default:
                 TraceEvents(TRACE_LEVEL_ERROR,
                     TRACE_INTERRUPT,
@@ -279,7 +288,9 @@ WireShockEvtUsbInterruptPipeReadComplete(
             case 8:
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth® Core Specification 4.2");
                 break;
-                //TODO: ADD BT 5.0
+            case 9:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth® Core Specification 5.0");//TODO: CHECK/ADD BT 5.0 support
+                break;
             default:
                 TraceEvents(TRACE_LEVEL_ERROR,
                     TRACE_INTERRUPT,
@@ -808,6 +819,20 @@ WireShockEvtUsbInterruptPipeReadComplete(
         break;
 
 #pragma endregion
+
+#pragma region HCI_Role_Change_EV
+
+    case HCI_Role_Change_EV:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_INTERRUPT,
+            "HCI_Role_Change_EV, Not Implemented");
+
+        break;
+
+#pragma endregion
+
+#pragma region HCI_EV_Default
     default:
 
         TraceEvents(TRACE_LEVEL_INFORMATION,
@@ -816,6 +841,8 @@ WireShockEvtUsbInterruptPipeReadComplete(
             event);
 
         break;
+
+#pragma endregion
     }
 }
 
