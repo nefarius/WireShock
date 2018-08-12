@@ -317,14 +317,15 @@ WireShockEvtWdfChildListAddressDescriptionCleanup(
     PWDF_CHILD_ADDRESS_DESCRIPTION_HEADER  AddressDescription
 )
 {
-    PPDO_ADDRESS_DESCRIPTION    pAddrDesc
-        = CONTAINING_RECORD(
-            AddressDescription,
-            PDO_ADDRESS_DESCRIPTION,
-            Header
-        );
+    PPDO_ADDRESS_DESCRIPTION    pAddrDesc;
 
     UNREFERENCED_PARAMETER(ChildList);
+
+    pAddrDesc = CONTAINING_RECORD(
+        AddressDescription,
+        PDO_ADDRESS_DESCRIPTION,
+        Header
+    );
 
     if (pAddrDesc->ChildDevice.RemoteName != NULL) {
         ExFreePoolWithTag(pAddrDesc->ChildDevice.RemoteName, WIRESHOCK_POOL_TAG);
@@ -358,7 +359,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
     PDS_FEATURE_GET_DEVICE_BD_ADDR      pGetDeviceBdAddr;
     PDS_FEATURE_GET_DEVICE_TYPE         pGetDeviceType;
     PDS_FEATURE_GET_CONNECTION_TYPE     pGetConnectionType;
-    PDEVICE_CONTEXT                     pParentCtx = DeviceGetContext(WdfPdoGetParent(device));
+    PDEVICE_CONTEXT                     pParentCtx;
     PDO_IDENTIFICATION_DESCRIPTION      identDesc;
 
 
@@ -464,7 +465,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
         TraceEvents(TRACE_LEVEL_INFORMATION,
             TRACE_WIREBUS,
             ">> IOCTL_HID_READ_REPORT");
-        
+
         status = WdfRequestForwardToIoQueue(Request, addrDesc.ChildDevice.HidInputReportQueue);
         if (!NT_SUCCESS(status)) {
             TraceEvents(TRACE_LEVEL_ERROR,
@@ -748,7 +749,7 @@ BOOLEAN WireBusGetPdoAddressDescriptionByHandle(
 )
 {
     NTSTATUS                        status;
-    WDFCHILDLIST                    list = WdfFdoGetDefaultChildList(Device);
+    WDFCHILDLIST                    list;
     WDF_CHILD_LIST_ITERATOR         iter;
     WDF_CHILD_RETRIEVE_INFO         info;
     PDO_IDENTIFICATION_DESCRIPTION  desc;
@@ -756,6 +757,8 @@ BOOLEAN WireBusGetPdoAddressDescriptionByHandle(
     BOOLEAN                         retval = FALSE;
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
+
+    list = WdfFdoGetDefaultChildList(Device);
 
     WDF_CHILD_LIST_ITERATOR_INIT(&iter, WdfRetrievePresentChildren);
 
@@ -972,12 +975,15 @@ WireChildOutputReportEvtTimerFunc(
 )
 {
     NTSTATUS                    status;
-    WDFDEVICE                   device = WdfTimerGetParentObject(Timer);
+    WDFDEVICE                   device;
     PDO_ADDRESS_DESCRIPTION     addrDesc;
     L2CAP_CID                   scid;
-    PDEVICE_CONTEXT             pParentCtx = DeviceGetContext(WdfPdoGetParent(device));
+    PDEVICE_CONTEXT             pParentCtx;
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
+
+    device = WdfTimerGetParentObject(Timer);
+    pParentCtx = DeviceGetContext(WdfPdoGetParent(device));
 
     WDF_CHILD_ADDRESS_DESCRIPTION_HEADER_INIT(&addrDesc.Header, sizeof(addrDesc));
 

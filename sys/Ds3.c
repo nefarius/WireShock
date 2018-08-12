@@ -36,11 +36,13 @@ Ds3ConnectionRequest(
     PUCHAR Buffer,
     PUCHAR CID)
 {
-    PL2CAP_SIGNALLING_CONNECTION_REQUEST data = (PL2CAP_SIGNALLING_CONNECTION_REQUEST)&Buffer[8];
-
     NTSTATUS    status;
     L2CAP_CID   dcid;
-    L2CAP_CID   scid = data->SCID;
+    L2CAP_CID   scid;
+
+    PL2CAP_SIGNALLING_CONNECTION_REQUEST data = (PL2CAP_SIGNALLING_CONNECTION_REQUEST)&Buffer[8];
+
+    scid = data->SCID;
 
     L2CAP_SET_CONNECTION_TYPE(
         Device,
@@ -130,11 +132,14 @@ NTSTATUS
 Ds3ConnectionResponse(
     PUCHAR Buffer)
 {
+    NTSTATUS    status = STATUS_SUCCESS;
+    L2CAP_CID   dcid;
+    L2CAP_CID   scid;
+
     PL2CAP_SIGNALLING_CONNECTION_RESPONSE data = (PL2CAP_SIGNALLING_CONNECTION_RESPONSE)&Buffer[8];
 
-    NTSTATUS    status = STATUS_SUCCESS;
-    L2CAP_CID   dcid = data->DCID;
-    L2CAP_CID   scid = data->SCID;
+    scid = data->SCID;
+    dcid = data->DCID;
 
     TraceEvents(TRACE_LEVEL_INFORMATION,
         TRACE_DS3,
@@ -184,11 +189,13 @@ NTSTATUS Ds3ConfigurationRequest(
     PBTH_DEVICE Device,
     PUCHAR Buffer)
 {
+    NTSTATUS    status;
+    L2CAP_CID   dcid;
+    L2CAP_CID   scid;
+
     PL2CAP_SIGNALLING_CONFIGURATION_REQUEST data = (PL2CAP_SIGNALLING_CONFIGURATION_REQUEST)&Buffer[8];
 
-    NTSTATUS    status;
-    L2CAP_CID   dcid = data->DCID;
-    L2CAP_CID   scid;
+    dcid = data->DCID;
 
     L2CAP_DEVICE_GET_SCID(Device, dcid, &scid);
 
@@ -245,10 +252,12 @@ Ds3ConfigurationResponse(
     PBTH_DEVICE Device,
     PUCHAR Buffer)
 {
+    NTSTATUS    status = STATUS_SUCCESS;
+    L2CAP_CID   scid;
+
     PL2CAP_SIGNALLING_CONFIGURATION_RESPONSE data = (PL2CAP_SIGNALLING_CONFIGURATION_RESPONSE)&Buffer[8];
 
-    NTSTATUS    status = STATUS_SUCCESS;
-    L2CAP_CID   scid = data->SCID;
+    scid = data->SCID;
 
     TraceEvents(TRACE_LEVEL_INFORMATION,
         TRACE_DS3,
@@ -339,12 +348,15 @@ Ds3DisconnectionRequest(
     PBTH_DEVICE Device,
     PUCHAR Buffer)
 {
+    NTSTATUS    status;
+    L2CAP_CID   dcid;
+    L2CAP_CID   scid;
+    L2CAP_CID   intDcid, comDcid;
+
     PL2CAP_SIGNALLING_DISCONNECTION_REQUEST data = (PL2CAP_SIGNALLING_DISCONNECTION_REQUEST)&Buffer[8];
 
-    NTSTATUS    status;
-    L2CAP_CID   dcid = data->DCID;
-    L2CAP_CID   scid = data->SCID;
-    L2CAP_CID   intDcid, comDcid;
+    scid = data->SCID;
+    dcid = data->DCID;
 
     TraceEvents(TRACE_LEVEL_INFORMATION,
         TRACE_DS3,
@@ -443,8 +455,8 @@ Ds3ProcessHidInputReport(
         case DS_HID_DEVICE_MODE_MULTI:
 
             DS3_RAW_TO_SPLIT_HID_INPUT_REPORT_01(
-                inputBuffer, 
-                outputBuffer, 
+                inputBuffer,
+                outputBuffer,
                 Device->Configuration.MuteDigitalPressureButtons
             );
 
@@ -452,7 +464,7 @@ Ds3ProcessHidInputReport(
         case DS_HID_DEVICE_MODE_SINGLE:
 
             DS3_RAW_TO_SINGLE_HID_INPUT_REPORT(
-                inputBuffer, 
+                inputBuffer,
                 outputBuffer,
                 Device->Configuration.MuteDigitalPressureButtons
             );
