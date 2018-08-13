@@ -673,7 +673,7 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
         TraceEvents(TRACE_LEVEL_INFORMATION,
             TRACE_INTERRUPT,
-            "HCI_Number_Of_Completed_Packets_EV, Not Implemeted");
+            "HCI_Number_Of_Completed_Packets_EV, Not Implemented");
 
         break;
 
