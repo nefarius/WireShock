@@ -85,7 +85,10 @@ Return Value:
                              );
 
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfDriverCreate failed %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DRIVER,
+            "WdfDriverCreate failed with status %!STATUS!",
+            status);
         WPP_CLEANUP(DriverObject);
         return status;
     }

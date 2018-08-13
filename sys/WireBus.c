@@ -97,18 +97,20 @@ WireShockEvtWdfChildListCreateDevice(
 
     status = WdfPdoInitAssignDeviceID(ChildInit, &deviceId);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_WIREBUS,
             "WdfPdoInitAssignDeviceID failed with status %!STATUS!",
             status);
         return status;
     }
 
     //
-    // NOTE: same string  is used to initialize hardware id too
+    // NOTE: same string is used to initialize hardware id too
     //
     status = WdfPdoInitAddHardwareID(ChildInit, &deviceId);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_WIREBUS,
             "WdfPdoInitAddHardwareID failed with status %!STATUS!",
             status);
         return status;
@@ -123,7 +125,8 @@ WireShockEvtWdfChildListCreateDevice(
         pDesc->ClientAddress.Address[1],
         pDesc->ClientAddress.Address[0]);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_WIREBUS,
             "RtlUnicodeStringPrintf failed with status %!STATUS!",
             status);
         return status;
@@ -131,7 +134,8 @@ WireShockEvtWdfChildListCreateDevice(
 
     status = WdfPdoInitAssignInstanceID(ChildInit, &buffer);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_WIREBUS,
             "WdfPdoInitAssignInstanceID failed with status %!STATUS!",
             status);
         return status;
@@ -149,7 +153,8 @@ WireShockEvtWdfChildListCreateDevice(
     status = RtlUnicodeStringPrintf(&buffer,
         L"WireShock HID Device");
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_WIREBUS,
             "RtlUnicodeStringPrintf failed with status %!STATUS!",
             status);
         return status;
@@ -168,7 +173,8 @@ WireShockEvtWdfChildListCreateDevice(
         &deviceLocation,
         0x409);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_WIREBUS,
             "WdfPdoInitAddDeviceText failed with status %!STATUS!",
             status);
         return status;
@@ -184,7 +190,8 @@ WireShockEvtWdfChildListCreateDevice(
 
     status = WdfDeviceCreate(&ChildInit, &pdoAttributes, &hChild);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_WIREBUS,
             "WdfDeviceCreate failed with status %!STATUS!",
             status);
         return status;
@@ -238,14 +245,15 @@ WireShockEvtWdfChildListCreateDevice(
 
     status = WdfPdoRetrieveAddressDescription(hChild, &addrDesc.Header);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_WIREBUS,
             "WdfPdoRetrieveAddressDescription failed with status %!STATUS!",
             status);
         return status;
     }
 
 #pragma region HID Input Report Queue creation
-    
+
     WDF_IO_QUEUE_CONFIG_INIT(&inputQueueCfg, WdfIoQueueDispatchManual);
     status = WdfIoQueueCreate(
         hChild,
@@ -254,7 +262,8 @@ WireShockEvtWdfChildListCreateDevice(
         &addrDesc.ChildDevice.HidInputReportQueue
     );
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_WIREBUS,
             "WdfIoQueueCreate failed with status %!STATUS!",
             status);
         return status;
@@ -274,7 +283,7 @@ WireShockEvtWdfChildListCreateDevice(
 
     status = WdfTimerCreate(
         &outTimerCfg,
-        &outTimerAttribs, 
+        &outTimerAttribs,
         &addrDesc.ChildDevice.OutputReportTimer
     );
     if (!NT_SUCCESS(status)) {
@@ -289,13 +298,14 @@ WireShockEvtWdfChildListCreateDevice(
 
     status = WdfPdoUpdateAddressDescription(hChild, &addrDesc.Header);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WIREBUS,
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_WIREBUS,
             "WdfPdoUpdateAddressDescription failed with status %!STATUS!",
             status);
         return status;
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit with status %!STATUS!", status);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exited with status %!STATUS!", status);
 
     return status;
 }
@@ -455,7 +465,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
         TraceEvents(TRACE_LEVEL_INFORMATION,
             TRACE_WIREBUS,
             ">> IOCTL_HID_READ_REPORT");
-        
+
         status = WdfRequestForwardToIoQueue(Request, addrDesc.ChildDevice.HidInputReportQueue);
         if (!NT_SUCCESS(status)) {
             TraceEvents(TRACE_LEVEL_ERROR,
@@ -556,6 +566,10 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
 
             break;
         default:
+            TraceEvents(TRACE_LEVEL_ERROR, //TODO: CHECK ME
+                TRACE_WIREBUS,
+                "%!FUNC!: Unknown IOCTL_HID_GET_FEATURE reportId %d, Default case triggered",
+                packet.reportId);
             break;
         }
 
@@ -595,6 +609,10 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
 
             break;
         default:
+            TraceEvents(TRACE_LEVEL_ERROR, //TODO: CHECK ME
+                TRACE_WIREBUS, //TODO: CHECK ME
+                "%!FUNC!: Unknown IOCTL_HID_SET_FEATURE reportId %d, Default case triggered",
+                packet.reportId);
             break;
         }
 
@@ -653,11 +671,11 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
     case IOCTL_HID_SEND_IDLE_NOTIFICATION_REQUEST:  // METHOD_NEITHER
                                                     //
                                                     // This has the USBSS Idle notification callback. If the lower driver
-                                                    // can handle it (e.g. USB stack can handle it) then pass it down
-                                                    // otherwise complete it here as not inplemented. For a virtual
+                                                    // can handle it (e.g. USB stack can handle it) then pass it down,
+                                                    // otherwise complete it here as not implemented. For a virtual
                                                     // device, idling is not needed.
                                                     //
-                                                    // Not implemented. fall through...
+                                                    // Not implemented. Fall through...
                                                     //
     case IOCTL_HID_ACTIVATE_DEVICE:                 // METHOD_NEITHER
     case IOCTL_HID_DEACTIVATE_DEVICE:               // METHOD_NEITHER
@@ -665,7 +683,7 @@ void WireChildEvtWdfIoQueueIoInternalDeviceControl(
                                                     //
                                                     // We don't do anything for these IOCTLs but some minidrivers might.
                                                     //
-                                                    // Not implemented. fall through...
+                                                    // Not implemented. Fall through...
                                                     //
     default:
         TraceEvents(TRACE_LEVEL_WARNING,
@@ -692,6 +710,8 @@ BOOLEAN WireBusGetPdoAddressDescription(
     NTSTATUS                        status;
     PDO_IDENTIFICATION_DESCRIPTION  childIdDesc;
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
+
     WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER_INIT(
         &childIdDesc.Header,
         sizeof(PDO_IDENTIFICATION_DESCRIPTION)
@@ -716,6 +736,8 @@ BOOLEAN WireBusGetPdoAddressDescription(
         return FALSE;
     }
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");
+
     return TRUE;
 }
 
@@ -734,6 +756,7 @@ BOOLEAN WireBusGetPdoAddressDescriptionByHandle(
     WDFDEVICE                       child;
     BOOLEAN                         retval = FALSE;
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
 
     list = WdfFdoGetDefaultChildList(Device);
 
@@ -798,6 +821,8 @@ BOOLEAN WireBusGetPdoAddressDescriptionByHandle(
 
     WdfChildListEndIteration(list, &iter);
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");
+
     return retval;
 }
 
@@ -809,6 +834,8 @@ BOOLEAN WireBusSetPdoAddressDescription(
 {
     NTSTATUS                        status;
     PDO_IDENTIFICATION_DESCRIPTION  childIdDesc;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
 
     WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER_INIT(
         &childIdDesc.Header,
@@ -823,7 +850,7 @@ BOOLEAN WireBusSetPdoAddressDescription(
         &AddressDescription->Header
     );
 
-    status = (status == STATUS_OBJECT_NAME_EXISTS) ? STATUS_SUCCESS : status;
+    status = ((status == STATUS_OBJECT_NAME_EXISTS) ? STATUS_SUCCESS : status);
 
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR,
@@ -832,6 +859,8 @@ BOOLEAN WireBusSetPdoAddressDescription(
             status);
         return FALSE;
     }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");
 
     return TRUE;
 }
@@ -908,7 +937,7 @@ VOID WireBusInitChildOutputReport(WDFDEVICE Device, PBD_ADDR Address)
         if (childAddrDesc.ChildDevice.OutputReportBuffer != NULL) {
             ExFreePoolWithTag(childAddrDesc.ChildDevice.OutputReportBuffer, WIRESHOCK_POOL_TAG);
         }
-        
+
         switch (childAddrDesc.ChildDevice.DeviceType)
         {
         case DS_DEVICE_TYPE_PS3_DUALSHOCK:
@@ -926,6 +955,10 @@ VOID WireBusInitChildOutputReport(WDFDEVICE Device, PBD_ADDR Address)
 
             break;
         default:
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_WIREBUS, //TODO: CHECK ME
+                "%!FUNC!: Unknown DeviceType %d, Default case triggered",
+                childAddrDesc.ChildDevice.DeviceType);
             break;
         }
 
@@ -946,6 +979,8 @@ WireChildOutputReportEvtTimerFunc(
     PDO_ADDRESS_DESCRIPTION     addrDesc;
     L2CAP_CID                   scid;
     PDEVICE_CONTEXT             pParentCtx;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Entry");
 
     device = WdfTimerGetParentObject(Timer);
     pParentCtx = DeviceGetContext(WdfPdoGetParent(device));
@@ -980,11 +1015,19 @@ WireChildOutputReportEvtTimerFunc(
         if (!NT_SUCCESS(status))
         {
             TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_QUEUE, "HID_Command failed with status %!STATUS!", status);
+                TRACE_QUEUE,
+                "HID_Command failed with status %!STATUS!",
+                status);
         }
 
         break;
     default:
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_WIREBUS, //TODO: CHECK ME
+            "%!FUNC!: Unknown DeviceType %d, Default case triggered",
+            addrDesc.ChildDevice.DeviceType);
         break;
     }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WIREBUS, "%!FUNC! Exit");
 }

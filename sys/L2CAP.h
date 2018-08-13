@@ -28,7 +28,7 @@ SOFTWARE.
 /**
 * \typedef enum _L2CAP_SIGNALLING_COMMAND_CODE
 *
-* \brief   Defines an alias representing an L2CAP signalling command code.
+* \brief   Defines an alias representing an L2CAP signaling command code.
 */
 typedef enum _L2CAP_SIGNALLING_COMMAND_CODE
 {
@@ -323,7 +323,7 @@ typedef struct _L2CAP_SIGNALLING_DISCONNECTION_RESPONSE
 /**
 * \def L2CAP_GET_SIGNALLING_COMMAND_CODE(_buf_) ((L2CAP_SIGNALLING_COMMAND_CODE)_buf_[8])
 *
-* \brief   A macro that validates the signalling command code.
+* \brief   A macro that validates the signaling command code.
 *
 * \author  Benjamin "Nefarius" Höglinger
 * \date    18.09.2017
@@ -335,7 +335,7 @@ typedef struct _L2CAP_SIGNALLING_DISCONNECTION_RESPONSE
 /**
 * \fn  BOOLEAN FORCEINLINE L2CAP_IS_SIGNALLING_COMMAND_CODE( PUCHAR Buffer )
 *
-* \brief   Checks if the supplied buffer represents a valid L2CAP signalling command code.
+* \brief   Checks if the supplied buffer represents a valid L2CAP signaling command code.
 *
 * \author  Benjamin "Nefarius" Höglinger
 * \date    18.09.2017

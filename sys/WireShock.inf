@@ -94,6 +94,7 @@ WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with
 %WireShock.DeviceDesc%=WireShock_Device, USB\VID_8086&PID_0189
 %WireShock.DeviceDesc%=WireShock_Device, USB\VID_8087&PID_07DA
 %WireShock.DeviceDesc%=WireShock_Device, USB\VID_8087&PID_07DC
+%WireShock.DeviceDesc%=WireShock_Device, USB\VID_8087&PID_0A2B
 %WireShock.DeviceDesc%=WireShock_Device, USB\VID_0B05&PID_17CB
 %WireShock.DeviceDesc%=WireShock_Device, USB\VID_0489&PID_E092
 %WireShock.DeviceDesc%=WireShock_Device, USB\VID_04CA&PID_300B
