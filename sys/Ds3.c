@@ -444,7 +444,7 @@ Ds3ProcessHidInputReport(
         if (!NT_SUCCESS(status))
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3,
-                "WdfRequestRetrieveOutputBuffer failed with status 0x%X (bufferLength: %d)",
+                "WdfRequestRetrieveOutputBuffer failed with status %!STATUS! (bufferLength: %d)",
                 status, (ULONG)bufferLength);
             WdfRequestComplete(Request, status);
             return status;
@@ -496,7 +496,7 @@ Ds3ProcessHidInputReport(
             if (!NT_SUCCESS(status))
             {
                 TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3,
-                    "WdfRequestRetrieveOutputBuffer failed with status 0x%X (bufferLength: %d)",
+                    "WdfRequestRetrieveOutputBuffer failed with status %!STATUS! (bufferLength: %d)",
                     status, (ULONG)bufferLength);
                 WdfRequestComplete(Request, status);
                 return status;
