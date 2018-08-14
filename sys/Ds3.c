@@ -426,6 +426,11 @@ Ds3ProcessHidInputReport(
     PUCHAR      inputBuffer;
     size_t      bufferLength;
 
+    //Check for dummy report sent over BT
+    if (Buffer[10] == 0xFF) {
+        return STATUS_SUCCESS;
+    }
+
     // Shift to the beginning of the report
     inputBuffer = &Buffer[9];
 
@@ -443,7 +448,8 @@ Ds3ProcessHidInputReport(
 
         if (!NT_SUCCESS(status))
         {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3,
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_DS3,
                 "WdfRequestRetrieveOutputBuffer failed with status %!STATUS! (bufferLength: %d)",
                 status, (ULONG)bufferLength);
             WdfRequestComplete(Request, status);
@@ -471,6 +477,10 @@ Ds3ProcessHidInputReport(
 
             break;
         default:
+            TraceEvents(TRACE_LEVEL_WARNING,
+                TRACE_DS3,
+                "%!FUNC!: Unknown HidDeviceMode %d, Default case triggered",
+                Device->Configuration.HidDeviceMode);
             break;
         }
 
@@ -495,13 +505,13 @@ Ds3ProcessHidInputReport(
 
             if (!NT_SUCCESS(status))
             {
-                TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3,
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_DS3,
                     "WdfRequestRetrieveOutputBuffer failed with status %!STATUS! (bufferLength: %d)",
                     status, (ULONG)bufferLength);
                 WdfRequestComplete(Request, status);
                 return status;
             }
-
             // Convert input to report
             DS3_RAW_TO_SPLIT_HID_INPUT_REPORT_02(inputBuffer, outputBuffer);
 
