@@ -855,7 +855,7 @@ WireShockEvtUsbInterruptPipeReadComplete(
                     "Controller is the Slave for the device");
                 break;
             default: 
-                break;;
+                break;
             }
         }
         else
