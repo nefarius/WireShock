@@ -826,7 +826,51 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
         TraceEvents(TRACE_LEVEL_INFORMATION,
             TRACE_INTERRUPT,
-            "HCI_Role_Change_EV, Not Implemented");
+            "HCI_Role_Change_EV");
+
+        BD_ADDR_FROM_BUFFER(clientAddr, &buffer[3]);
+
+        if (buffer[2] == 0x00)
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Role_Change_EV SUCCESS: %02X:%02X:%02X:%02X:%02X:%02X",
+                clientAddr.Address[0],
+                clientAddr.Address[1],
+                clientAddr.Address[2],
+                clientAddr.Address[3],
+                clientAddr.Address[4],
+                clientAddr.Address[5]);
+
+            switch (buffer[9])
+            {
+            case 0x00:
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_INTERRUPT,
+                    "Controller is the Master for the device");
+                break;
+            case 0x01:
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_INTERRUPT,
+                    "Controller is the Slave for the device");
+                break;
+            default: 
+                break;;
+            }
+        }
+        else
+        {
+            TraceEvents(TRACE_LEVEL_WARNING,
+                TRACE_INTERRUPT,
+                "Role change failed for device %02X:%02X:%02X:%02X:%02X:%02X with status 0x%X",
+                clientAddr.Address[0],
+                clientAddr.Address[1],
+                clientAddr.Address[2],
+                clientAddr.Address[3],
+                clientAddr.Address[4],
+                clientAddr.Address[5],
+                buffer[2]);
+        }
 
         break;
 
