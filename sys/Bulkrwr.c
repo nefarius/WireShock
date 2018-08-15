@@ -336,7 +336,9 @@ WireShockEvtUsbBulkReadPipeReadComplete(
 
                 TraceEvents(TRACE_LEVEL_WARNING,
                     TRACE_BULKRWR,
-                    ">> L2CAP_Disconnection_Response");
+                    ">> L2CAP_Disconnection_Response (not implemented)");
+
+                // TODO: does this ever happen? 
 
                 break;
 
