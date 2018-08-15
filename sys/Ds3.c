@@ -435,7 +435,8 @@ Ds3ProcessHidInputReport(
     * events.
     */
     if (Buffer[10] == 0xFF) {
-        return STATUS_SUCCESS;
+        // Status isn't checked but it makes more sense to report failure
+        return STATUS_UNSUCCESSFUL;
     }
 
     // Shift to the beginning of the report
