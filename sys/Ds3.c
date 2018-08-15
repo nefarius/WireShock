@@ -426,7 +426,14 @@ Ds3ProcessHidInputReport(
     PUCHAR      inputBuffer;
     size_t      bufferLength;
 
-    //Check for dummy report sent over BT
+    /*
+    * When connected via Bluetooth the Sixaxis occasionally sends
+    * a report with the second byte 0xff and the rest zeroed.
+    *
+    * This report does not reflect the actual state of the
+    * controller must be ignored to avoid generating false input
+    * events.
+    */
     if (Buffer[10] == 0xFF) {
         return STATUS_SUCCESS;
     }
