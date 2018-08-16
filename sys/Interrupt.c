@@ -883,7 +883,25 @@ WireShockEvtUsbInterruptPipeReadComplete(
             TRACE_INTERRUPT,
             "HCI_Command_Status_EV");
 
-        // TODO: implement
+        if (buffer[2] == 0x00)
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Command_Status_EV SUCCESS: Num_HCI_Command_Packets: 0x%02X, Command_Opcode: 0x%04X",
+                buffer[3], 
+                *((PUSHORT)&buffer[4])
+            );
+        }
+        else
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "HCI_Command_Status_EV FAILED (0x%02X): Num_HCI_Command_Packets: 0x%02X, Command_Opcode: 0x%04X",
+                buffer[2], 
+                buffer[3], 
+                *((PUSHORT)&buffer[4])
+            );
+        }
 
         break;
 
@@ -941,7 +959,7 @@ WireShockEvtUsbInterruptPipeReadComplete(
                 clientAddr.Address[5]);
             break;
 
-        default: 
+        default:
             break;
         }
 
