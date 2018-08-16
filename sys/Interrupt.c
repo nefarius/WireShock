@@ -853,7 +853,7 @@ WireShockEvtUsbInterruptPipeReadComplete(
                     TRACE_INTERRUPT,
                     "Controller is the Slave for the device");
                 break;
-            default: 
+            default:
                 break;
             }
         }
@@ -875,13 +875,87 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
 #pragma endregion
 
+#pragma region HCI_Command_Status_EV
+
+    case HCI_Command_Status_EV:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_INTERRUPT,
+            "HCI_Command_Status_EV");
+
+        // TODO: implement
+
+        break;
+
+#pragma endregion
+
+#pragma region HCI_Page_Scan_Repetition_Mode_Change_EV
+
+    case HCI_Page_Scan_Repetition_Mode_Change_EV:
+
+        //
+        // NOTE: this is an informative event
+        // 
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_INTERRUPT,
+            "HCI_Page_Scan_Repetition_Mode_Change_EV");
+
+        BD_ADDR_FROM_BUFFER(clientAddr, &buffer[2]);
+
+        switch (buffer[8])
+        {
+        case 0x00:
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "Page Scan Repetition Mode for device %02X:%02X:%02X:%02X:%02X:%02X changed to R0",
+                clientAddr.Address[0],
+                clientAddr.Address[1],
+                clientAddr.Address[2],
+                clientAddr.Address[3],
+                clientAddr.Address[4],
+                clientAddr.Address[5]);
+            break;
+
+        case 0x01:
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "Page Scan Repetition Mode for device %02X:%02X:%02X:%02X:%02X:%02X changed to R1",
+                clientAddr.Address[0],
+                clientAddr.Address[1],
+                clientAddr.Address[2],
+                clientAddr.Address[3],
+                clientAddr.Address[4],
+                clientAddr.Address[5]);
+            break;
+
+        case 0x02:
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_INTERRUPT,
+                "Page Scan Repetition Mode for device %02X:%02X:%02X:%02X:%02X:%02X changed to R2",
+                clientAddr.Address[0],
+                clientAddr.Address[1],
+                clientAddr.Address[2],
+                clientAddr.Address[3],
+                clientAddr.Address[4],
+                clientAddr.Address[5]);
+            break;
+
+        default: 
+            break;
+        }
+
+        break;
+
+#pragma endregion
+
     default:
 
         // TODO: implement events ending up here
 
         TraceEvents(TRACE_LEVEL_WARNING,
             TRACE_INTERRUPT,
-            "%!FUNC!: Unknown HCI Event (0x%X) recieved, Default case triggered",
+            "%!FUNC!: Unknown HCI Event (0x%02X) recieved, Default case triggered",
             event);
 
         break;
