@@ -110,13 +110,20 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
         command = (HCI_COMMAND)(USHORT)(buffer[3] | buffer[4] << 8);
         break;
+
     case HCI_Command_Status_EV:
         //TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Command_Status_EV");
 
         command = (HCI_COMMAND)(USHORT)(buffer[4] | buffer[5] << 8);
 
-        if (buffer[2] != 0)
+        //
+        // Handle only failures
+        // 
+        if (buffer[2] != 0x00)
         {
+            //
+            // If one of the following commands has failed, SSP isn't supported
+            // 
             switch (command)
             {
             case HCI_Write_Simple_Pairing_Mode:
@@ -131,22 +138,14 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
                 status = HCI_Command_Write_Scan_Enable(pDeviceContext);
                 break;
+
             default:
-                TraceEvents(TRACE_LEVEL_ERROR,
-                    TRACE_INTERRUPT,
-                    "HCI_Command_Status_EV Unknown command %d, Default case triggered",
-                    command);
                 break;
             }
         }
         break;
-    case HCI_Number_Of_Completed_Packets_EV: //TODO
-        break;
+
     default:
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_INTERRUPT,
-            "%!FUNC! Unknown event %d, Default case triggered",
-            event);
         break;
     }
 
@@ -876,17 +875,17 @@ WireShockEvtUsbInterruptPipeReadComplete(
 
 #pragma endregion
 
-#pragma region HCI_EV_Default
     default:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
+        // TODO: implement events ending up here
+
+        TraceEvents(TRACE_LEVEL_WARNING,
             TRACE_INTERRUPT,
-            "%!FUNC!: Unknown Event (%d) recieved, Default case triggered",
+            "%!FUNC!: Unknown HCI Event (0x%X) recieved, Default case triggered",
             event);
 
         break;
 
-#pragma endregion
     }
 }
 
