@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Linq;
 using Nuke.Common;
 using Nuke.Common.Git;
+using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Tools.MSBuild;
 using static Nuke.Common.EnvironmentInfo;
@@ -11,43 +12,50 @@ using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
 
 class Build : NukeBuild
 {
-    // Console application entry point. Also defines the default target.
     public static int Main () => Execute<Build>(x => x.Compile);
 
-    // Auto-injection fields:
-
-    // [GitVersion] readonly GitVersion GitVersion;
-    // Semantic versioning. Must have 'GitVersion.CommandLine' referenced.
-
-    // [GitRepository] readonly GitRepository GitRepository;
-    // Parses origin, branch name and head from git config.
-
-    // [Parameter] readonly string MyGetApiKey;
-    // Returns command-line arguments and environment variables.
-    
-    // [Solution] readonly Solution Solution;
-    // Provides access to the structure of the solution.
+    [Solution("WireShock.sln")] readonly Solution Solution;
+    [GitRepository] readonly GitRepository GitRepository;
+    [GitVersion] readonly GitVersion GitVersion;
 
     Target Clean => _ => _
-            .OnlyWhen(() => false) // Disabled for safety.
-            .Executes(() =>
-            {
-                DeleteDirectories(GlobDirectories(SourceDirectory, "**/bin", "**/obj"));
-                EnsureCleanDirectory(OutputDirectory);
-            });
+        .Executes(() =>
+        {
+        });
 
     Target Restore => _ => _
-            .DependsOn(Clean)
-            .Executes(() =>
-            {
-                MSBuild(s => DefaultMSBuildRestore);
-            });
+        .DependsOn(Clean)
+        .Executes(() =>
+        {
+            MSBuild(s => s
+                .SetTargetPath(SolutionFile)
+                .SetTargets("Restore"));
+        });
 
     Target Compile => _ => _
-            .DependsOn(Restore)
-            .Executes(() =>
-            {
-                MSBuild(s => DefaultMSBuildCompile.SetTargetPlatform(MSBuildTargetPlatform.x64));
-                MSBuild(s => DefaultMSBuildCompile.SetTargetPlatform(MSBuildTargetPlatform.x86));
-            });
+        .DependsOn(Restore)
+        .Executes(() =>
+        {
+            MSBuild(s => s
+                .SetTargetPath(SolutionFile)
+                .SetTargets("Rebuild")
+                .SetConfiguration(Configuration)
+                .SetAssemblyVersion(GitVersion.GetNormalizedAssemblyVersion())
+                .SetFileVersion(GitVersion.GetNormalizedFileVersion())
+                .SetInformationalVersion(GitVersion.InformationalVersion)
+                .SetMaxCpuCount(Environment.ProcessorCount)
+                .SetNodeReuse(IsLocalBuild));
+        });
+
+    Target Pack => _ => _
+        .DependsOn(Compile)
+        .Executes(() =>
+        {
+            MSBuild(s => s
+                .SetTargetPath(SolutionFile)
+                .SetTargets("Restore", "Pack")
+                .SetPackageVersion(GitVersion.NuGetVersionV2)
+                .SetConfiguration(Configuration)
+                .EnableIncludeSymbols());
+        });
 }
