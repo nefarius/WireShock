@@ -17,6 +17,7 @@ class Build : NukeBuild
     [Solution("WireShock.sln")] readonly Solution Solution;
     [GitRepository] readonly GitRepository GitRepository;
     [GitVersion] readonly GitVersion GitVersion;
+    [Parameter] string Configuration => IsLocalBuild ? "Debug" : "Release";
 
     Target Clean => _ => _
         .Executes(() =>
@@ -28,7 +29,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             MSBuild(s => s
-                .SetTargetPath(SolutionFile)
+                .SetTargetPath(Solution)
                 .SetTargets("Restore"));
         });
 
@@ -37,7 +38,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             MSBuild(s => s
-                .SetTargetPath(SolutionFile)
+                .SetTargetPath(Solution)
                 .SetTargets("Rebuild")
                 .SetConfiguration(Configuration)
                 .SetAssemblyVersion(GitVersion.GetNormalizedAssemblyVersion())
@@ -52,7 +53,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             MSBuild(s => s
-                .SetTargetPath(SolutionFile)
+                .SetTargetPath(Solution)
                 .SetTargets("Restore", "Pack")
                 .SetPackageVersion(GitVersion.NuGetVersionV2)
                 .SetConfiguration(Configuration)
