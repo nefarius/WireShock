@@ -161,6 +161,7 @@ Return Value:
     WDF_USB_PIPE_INFORMATION            pipeInfo;
     UCHAR                               index;
     UCHAR                               numberConfiguredPipes;
+    WDF_USB_DEVICE_CREATE_CONFIG        usbConfig;
 
     UNREFERENCED_PARAMETER(ResourceList);
     UNREFERENCED_PARAMETER(ResourceListTranslated);
@@ -185,14 +186,21 @@ Return Value:
     //
     if (pDeviceContext->UsbDevice == NULL) {
 
-        status = WdfUsbTargetDeviceCreate(Device,
+        WDF_USB_DEVICE_CREATE_CONFIG_INIT(
+            &usbConfig,
+            USBD_CLIENT_CONTRACT_VERSION_602
+        );
+
+        status = WdfUsbTargetDeviceCreateWithParameters(
+            Device,
+            &usbConfig,
             WDF_NO_OBJECT_ATTRIBUTES,
             &pDeviceContext->UsbDevice
         );
 
         if (!NT_SUCCESS(status)) {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
-                "WdfUsbTargetDeviceCreateWithParameters failed 0x%x", status);
+                "WdfUsbTargetDeviceCreateWithParameters failed %!STATUS!", status);
             return status;
         }
     }
