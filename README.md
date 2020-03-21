@@ -8,7 +8,15 @@ This was a research project and an attempt of porting over the Bluetooth host st
 
 ---
 
-## About
+## Summary
+
+`WireShock` is a Windows kernel-mode driver implementing a custom Windows Bluetooth Stack handling wireless communication with Sony DualShock 3 and 4 controllers. It acts as a function driver for a variety of USB host radios (see [`WireShock.inf`](sys/WireShock.inf)) and a bus driver to expose connected controllers as HID devices to the system (see [`WireShockHidDevice.inf`](sys/WireShockHidDevice.inf)).
+
+## Architecture
+
+Since the Sony DualShock 3 utilizes a butchered non-standard Bluetooth protocol incompatible with standard HID profiles a custom Bluetooth stack is required to establish a connection on the Windows platform. `WireShock` implements a compatible Bluetooth stack and also acts as a bus emulator allowing for multiple devices to connect and transmit. It's designed to work with most USB Bluetooth host devices obeying at least [Core Version 2.1 + EDR](https://www.bluetooth.com/specifications/bluetooth-core-specification/legacy-specifications) standards.
+
+The actual input and output reports are exposed by HID-compliant child PDOs using a [custom report format](common/src/DsHid.c) to additionally present pressure axes to DirectInput.
 
 ## Supported systems
 
