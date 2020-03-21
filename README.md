@@ -4,7 +4,7 @@ Windows Bluetooth Host Driver for Sony DualShock Controllers
 
 ---
 
-This was a research project and an attempt of porting over the Bluetooth host stack from the C#-implementation used in [ScpToolkit](https://github.com/nefarius/ScpToolkit) to a native C Windows kernel-mode bus driver. It has been discontinued [in favour of better solutions](https://forums.vigem.org/topic/242/bluetooth-filter-driver-for-ds3-compatibility-research-notes). The code will stay up for anyone to use as either an inspiration or a negative example 😜 Do bear in mind, that the code may contain unaddressed issues!
+This was a research project and an attempt of porting over the Bluetooth host stack from the C#-implementation used in [ScpToolkit](https://github.com/nefarius/ScpToolkit) to a native C Windows kernel-mode bus driver. It has been discontinued [in favour of better solutions](https://forums.vigem.org/topic/242/bluetooth-filter-driver-for-ds3-compatibility-research-notes). The code will stay up for anyone to use as either an inspiration or a negative example 😜 Do bear in mind, that the code may contain unaddressed issues! Compile and use at your own risk!
 
 ---
 
