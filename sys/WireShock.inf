@@ -147,7 +147,7 @@ KmdfLibraryVersion = $KMDFVERSION$
 
 [Strings]
 SPSVCINST_ASSOCSERVICE= 0x00000002
-ManufacturerName="Benjamin Höglinger-Stelzer"
+ManufacturerName="TODO: set manufacturer"
 ClassName="Universal Serial Bus devices"
 DiskName = "WireShock Installation Disk"
 WireShock.DeviceDesc = "WireShock Device"
